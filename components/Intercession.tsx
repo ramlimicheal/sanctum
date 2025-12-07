@@ -1,20 +1,39 @@
-import React, { useState } from 'react';
-import { Plus, Heart, Clock, Sparkles, Loader2, X, AlertCircle, Focus, Maximize2, Minimize2 } from 'lucide-react';
-import { IntercessionItem } from '../types';
-import { generateIntercessionPrayer } from '../services/geminiService';
-
-const MOCK_DATA: IntercessionItem[] = [
-  { id: '1', name: 'Sarah Miller', request: 'Healing for her mother after surgery.', lastPrayed: new Date(Date.now() - 86400000 * 2), category: 'Health' },
-  { id: '2', name: 'Pastor John', request: 'Wisdom for the upcoming sermon series.', lastPrayed: new Date(Date.now() - 86400000 * 5), category: 'Guidance' },
-];
+import React, { useState, useEffect } from 'react';
+import { Plus, Heart, Clock, Sparkles, Loader2, X, AlertCircle, Maximize2, Trash2 } from 'lucide-react';
+import { IntercessionItem } from '@/types';
+import { generateIntercessionPrayer } from '@/services/geminiService';
+import { getIntercessionItems, saveIntercessionItems } from '@/services/storageService';
 
 const Intercession: React.FC = () => {
-  const [items, setItems] = useState<IntercessionItem[]>(MOCK_DATA);
+  const [items, setItems] = useState<IntercessionItem[]>([]);
   const [isAdding, setIsAdding] = useState(false);
-  const [newItem, setNewItem] = useState({ name: '', request: '' });
+  const [newItem, setNewItem] = useState({ name: '', request: '', category: 'General' as IntercessionItem['category'] });
   const [generatedPrayer, setGeneratedPrayer] = useState<{id: string, text: string} | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [focusModeItem, setFocusModeItem] = useState<IntercessionItem | null>(null);
+
+  // Load items from storage on mount
+  useEffect(() => {
+    const storedItems = getIntercessionItems();
+    if (storedItems.length > 0) {
+      setItems(storedItems);
+    } else {
+      // Set default mock data for first-time users
+      const mockData: IntercessionItem[] = [
+        { id: '1', name: 'Sarah Miller', request: 'Healing for her mother after surgery.', lastPrayed: new Date(Date.now() - 86400000 * 2), category: 'Health' },
+        { id: '2', name: 'Pastor John', request: 'Wisdom for the upcoming sermon series.', lastPrayed: new Date(Date.now() - 86400000 * 5), category: 'Guidance' },
+      ];
+      setItems(mockData);
+      saveIntercessionItems(mockData);
+    }
+  }, []);
+
+  // Save items whenever they change
+  useEffect(() => {
+    if (items.length > 0) {
+      saveIntercessionItems(items);
+    }
+  }, [items]);
 
   const handleAdd = () => {
     if (!newItem.name || !newItem.request) return;
@@ -23,11 +42,15 @@ const Intercession: React.FC = () => {
       name: newItem.name,
       request: newItem.request,
       lastPrayed: null,
-      category: 'General'
+      category: newItem.category
     };
     setItems([item, ...items]);
-    setNewItem({ name: '', request: '' });
+    setNewItem({ name: '', request: '', category: 'General' });
     setIsAdding(false);
+  };
+
+  const handleDelete = (id: string) => {
+    setItems(items.filter(i => i.id !== id));
   };
 
   const generatePrayer = async (item: IntercessionItem) => {
@@ -133,11 +156,22 @@ const Intercession: React.FC = () => {
             onChange={e => setNewItem({...newItem, name: e.target.value})}
           />
           <textarea 
-            className="w-full mb-4 p-3 bg-stone-50 rounded-lg border border-stone-200 outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-all text-stone-900 placeholder:text-stone-400 resize-none h-24"
+            className="w-full mb-3 p-3 bg-stone-50 rounded-lg border border-stone-200 outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-all text-stone-900 placeholder:text-stone-400 resize-none h-24"
             placeholder="What is the need?"
             value={newItem.request}
             onChange={e => setNewItem({...newItem, request: e.target.value})}
           />
+          <select
+            className="w-full mb-4 p-3 bg-stone-50 rounded-lg border border-stone-200 outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-all text-stone-900"
+            value={newItem.category}
+            onChange={e => setNewItem({...newItem, category: e.target.value as IntercessionItem['category']})}
+          >
+            <option value="General">General</option>
+            <option value="Health">Health</option>
+            <option value="Family">Family</option>
+            <option value="Salvation">Salvation</option>
+            <option value="Guidance">Guidance</option>
+          </select>
           <button 
             onClick={handleAdd}
             className="w-full bg-stone-800 text-white py-2 rounded-lg font-medium hover:bg-stone-700"
@@ -180,6 +214,13 @@ const Intercession: React.FC = () => {
                   title="Quick Prayer Starter"
                 >
                   {loadingId === item.id ? <Loader2 className="animate-spin" size={20} /> : <Sparkles size={20} />}
+                </button>
+                <button 
+                  onClick={() => handleDelete(item.id)}
+                  className="text-stone-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100"
+                  title="Delete"
+                >
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>

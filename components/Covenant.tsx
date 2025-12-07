@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { HeartHandshake, Heart, MessageCircle, AlertTriangle, ArrowRight, Loader2, Feather, Check, Sparkles } from 'lucide-react';
-import { reframeConflict } from '../services/geminiService';
-import { PeaceResponse } from '../types';
+import React, { useState, useEffect } from 'react';
+import { HeartHandshake, Heart, MessageCircle, AlertTriangle, Loader2, Feather, Check, Sparkles } from 'lucide-react';
+import { reframeConflict } from '@/services/geminiService';
+import { PeaceResponse } from '@/types';
+import { getLoveNotes, saveLoveNotes } from '@/services/storageService';
 
 const Covenant: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'peacemaker'>('dashboard');
@@ -11,9 +12,28 @@ const Covenant: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [peacePlan, setPeacePlan] = useState<PeaceResponse | null>(null);
 
-  // Simple "Love Jar" state for demo
+  // Love Jar state
   const [loveNote, setLoveNote] = useState('');
-  const [notes, setNotes] = useState<string[]>(['Thank you for making coffee this morning.', 'I love how patient you were with the kids.']);
+  const [notes, setNotes] = useState<string[]>([]);
+
+  // Load notes from storage on mount
+  useEffect(() => {
+    const storedNotes = getLoveNotes();
+    if (storedNotes.length > 0) {
+      setNotes(storedNotes);
+    } else {
+      const defaultNotes = ['Thank you for making coffee this morning.', 'I love how patient you were with the kids.'];
+      setNotes(defaultNotes);
+      saveLoveNotes(defaultNotes);
+    }
+  }, []);
+
+  // Save notes whenever they change
+  useEffect(() => {
+    if (notes.length > 0) {
+      saveLoveNotes(notes);
+    }
+  }, [notes]);
 
   const handleReframing = async () => {
     if (!rawThought.trim()) return;

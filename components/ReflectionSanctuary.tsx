@@ -1,14 +1,14 @@
 import React, { useState, useRef } from 'react';
 import { Mic, StopCircle, Sparkles, Activity, BookOpen, Loader2, PlayCircle, AlertCircle, X } from 'lucide-react';
-import { analyzeReflection } from '../services/geminiService';
-import { SpiritualPrescription } from '../types';
+import { analyzeReflection } from '@/services/geminiService';
+import { SpiritualPrescription } from '@/types';
 
 const ReflectionSanctuary: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [prescription, setPrescription] = useState<SpiritualPrescription | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [warningMsg, setWarningMsg] = useState<string | null>(null);
   
   // Ref for speech recognition
   const recognitionRef = useRef<any>(null);
@@ -22,7 +22,7 @@ const ReflectionSanctuary: React.FC = () => {
   };
 
   const startRecording = () => {
-    setError(null);
+    setWarningMsg(null);
     setIsRecording(true);
     setTranscript('');
     setPrescription(null);
@@ -44,16 +44,16 @@ const ReflectionSanctuary: React.FC = () => {
       };
 
       recognition.onerror = (event: any) => {
-        console.error("Speech recognition error", event.error);
-        if (event.error === 'not-allowed') {
-            setError("Microphone access denied. Please allow microphone permissions in your browser or use the Simulate button.");
-        } else if (event.error === 'no-speech') {
-            // Ignore no-speech often, or show a subtle hint
-            setError("No speech detected. Please try speaking closer to the microphone.");
-        } else if (event.error === 'network') {
-            setError("Network error connecting to speech services. Please check your internet or use the 'Simulate' button.");
+        const errCode = event.error;
+        console.warn("Speech recognition issue", errCode);
+        if (errCode === 'not-allowed') {
+            setWarningMsg("Microphone access denied. Please allow microphone permissions in your browser or use the Simulate button.");
+        } else if (errCode === 'no-speech') {
+            setWarningMsg("No speech detected. Please try speaking closer to the microphone.");
+        } else if (errCode === 'network') {
+            setWarningMsg("Network issue connecting to speech services. Please check your internet or use the 'Simulate' button.");
         } else {
-            setError(`Error: ${event.error}`);
+            setWarningMsg(`Issue: ${errCode}`);
         }
         setIsRecording(false);
       };
@@ -65,7 +65,7 @@ const ReflectionSanctuary: React.FC = () => {
       recognitionRef.current = recognition;
       recognition.start();
     } else {
-      setError("Voice recognition is not supported in this browser. Please use Chrome or Safari, or try the 'Simulate' button.");
+      setWarningMsg("Voice recognition is not supported in this browser. Please use Chrome or Safari, or try the 'Simulate' button.");
       setIsRecording(false);
     }
   };
@@ -78,7 +78,7 @@ const ReflectionSanctuary: React.FC = () => {
   };
 
   const simulateInput = () => {
-     setError(null);
+     setWarningMsg(null);
      setTranscript("Lord, I am feeling incredibly overwhelmed with my work. I feel like I'm failing everyone and I don't know how to rest properly. I'm just exhausted.");
   }
 
@@ -104,11 +104,11 @@ const ReflectionSanctuary: React.FC = () => {
              flex-1 bg-white rounded-2xl border transition-all relative overflow-hidden flex flex-col p-6 shadow-sm group
              ${isRecording ? 'border-red-400 ring-4 ring-red-50' : 'border-stone-200 focus-within:ring-2 focus-within:ring-gold-500/20 focus-within:border-gold-500/50'}
            `}>
-             {error && (
+             {warningMsg && (
                 <div className="absolute top-4 left-4 right-4 bg-red-50 border border-red-100 text-red-600 p-3 rounded-lg text-xs flex items-start gap-2 z-30">
                     <AlertCircle size={14} className="mt-0.5 shrink-0" />
-                    <span className="flex-1">{error}</span>
-                    <button onClick={() => setError(null)} className="hover:text-red-800"><X size={14}/></button>
+                    <span className="flex-1">{warningMsg}</span>
+                    <button onClick={() => setWarningMsg(null)} className="hover:text-red-800"><X size={14}/></button>
                 </div>
              )}
 

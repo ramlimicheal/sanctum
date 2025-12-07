@@ -1,9 +1,10 @@
 
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { ACTSStep, ScriptureWeaveResult, SpiritualPrescription, VisionCard, AlignmentResult, PivotStrategy, PeaceResponse } from "../types";
+import { ACTSStep, ScriptureWeaveResult, SpiritualPrescription, VisionCard, AlignmentResult, PivotStrategy, PeaceResponse } from "@/types";
 
 // Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 const MODEL_NAME = 'gemini-2.5-flash';
 
 const SYSTEM_INSTRUCTION = `
@@ -13,7 +14,20 @@ Use a tone that is reverent, encouraging, and biblically grounded (NIV/ESV style
 Avoid prosperity gospel rhetoric; focus on spiritual depth, peace, and alignment with God's will.
 `;
 
+// Helper to check if AI is available
+const checkAI = () => {
+  if (!ai) {
+    console.warn('Gemini API key not configured. Using fallback responses.');
+    return false;
+  }
+  return true;
+};
+
 export const generateACTSPrompts = async (step: ACTSStep): Promise<string[]> => {
+  if (!checkAI()) {
+    return ["Focus your heart on God.", "Speak what is on your mind.", "Listen to His still small voice."];
+  }
+  
   try {
     const prompt = `
       Provide 3 distinct, short, and reflective prayer prompts for the "${step}" stage of the A.C.T.S. prayer model.
@@ -27,7 +41,7 @@ export const generateACTSPrompts = async (step: ACTSStep): Promise<string[]> => 
       Return ONLY the 3 prompts as a JSON array of strings.
     `;
 
-    const response = await ai.models.generateContent({
+    const response = await ai!.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
       config: {
@@ -51,6 +65,14 @@ export const generateACTSPrompts = async (step: ACTSStep): Promise<string[]> => 
 };
 
 export const weaveScripture = async (journalEntry: string): Promise<ScriptureWeaveResult | null> => {
+  if (!checkAI()) {
+    return {
+      verseText: "Cast all your anxiety on him because he cares for you.",
+      reference: "1 Peter 5:7",
+      prayer: "Lord, I bring my burdens to you, trusting in your care and love for me."
+    };
+  }
+  
   try {
     const prompt = `
       Read this user's journal entry: "${journalEntry}"
@@ -71,7 +93,7 @@ export const weaveScripture = async (journalEntry: string): Promise<ScriptureWea
       required: ["verseText", "reference", "prayer"]
     };
 
-    const response = await ai.models.generateContent({
+    const response = await ai!.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
       config: {
@@ -92,13 +114,17 @@ export const weaveScripture = async (journalEntry: string): Promise<ScriptureWea
 };
 
 export const generateIntercessionPrayer = async (name: string, request: string): Promise<string> => {
+  if (!checkAI()) {
+    return `Heavenly Father, we lift up ${name} to you. We ask that you would meet their need regarding ${request}. Grant them your peace and provision. In Jesus' name, Amen.`;
+  }
+  
   try {
     const prompt = `
       Write a short, heartfelt prayer (2-3 sentences) for ${name}, regarding: "${request}".
       Use scriptural language suitable for intercession.
     `;
 
-    const response = await ai.models.generateContent({
+    const response = await ai!.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
       config: {
@@ -114,6 +140,10 @@ export const generateIntercessionPrayer = async (name: string, request: string):
 };
 
 export const synthesizePrayerSession = async (inputs: Record<string, string>): Promise<string> => {
+  if (!checkAI()) {
+    return `Lord, I come before you with adoration for who you are. I confess my shortcomings and ask for your forgiveness. Thank you for your countless blessings. I bring my needs before you, trusting in your provision. In Jesus' name, Amen.`;
+  }
+  
   try {
     const prompt = `
       The user has just completed a prayer session using the A.C.T.S. model.
@@ -127,7 +157,7 @@ export const synthesizePrayerSession = async (inputs: Record<string, string>): P
       Make it flow naturally like a Psalm. Do not label the sections. Just write the prayer.
     `;
 
-    const response = await ai.models.generateContent({
+    const response = await ai!.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
       config: {
@@ -143,6 +173,18 @@ export const synthesizePrayerSession = async (inputs: Record<string, string>): P
 };
 
 export const analyzeReflection = async (transcript: string): Promise<SpiritualPrescription | null> => {
+  if (!checkAI()) {
+    return {
+      emotion: "Seeking",
+      diagnosis: "Your heart is reaching out for guidance and peace.",
+      verses: [
+        { text: "Trust in the Lord with all your heart and lean not on your own understanding.", reference: "Proverbs 3:5" },
+        { text: "Be still, and know that I am God.", reference: "Psalm 46:10" }
+      ],
+      insight: "In moments of uncertainty, God invites us to rest in His sovereignty. He is working even when we cannot see it."
+    };
+  }
+  
   try {
     const prompt = `
       The user is speaking their heart to God in a moment of meditation.
@@ -176,7 +218,7 @@ export const analyzeReflection = async (transcript: string): Promise<SpiritualPr
       required: ["emotion", "diagnosis", "verses", "insight"]
     };
 
-    const response = await ai.models.generateContent({
+    const response = await ai!.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
       config: {
@@ -197,6 +239,17 @@ export const analyzeReflection = async (transcript: string): Promise<SpiritualPr
 };
 
 export const generateVisionBoard = async (focus: string): Promise<VisionCard | null> => {
+  if (!checkAI()) {
+    return {
+      id: Date.now().toString(),
+      focus,
+      visualKeyword: 'peaceful sunrise mountains',
+      affirmation: `I am walking in God's purpose for ${focus}.`,
+      scripture: 'For I know the plans I have for you, declares the Lord.',
+      reference: 'Jeremiah 29:11'
+    };
+  }
+  
   try {
     const prompt = `
       The user wants to visualize a spiritual focus/goal: "${focus}".
@@ -219,7 +272,7 @@ export const generateVisionBoard = async (focus: string): Promise<VisionCard | n
       required: ["visualKeyword", "affirmation", "scripture", "reference"]
     };
 
-    const response = await ai.models.generateContent({
+    const response = await ai!.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
       config: {
@@ -245,6 +298,18 @@ export const generateVisionBoard = async (focus: string): Promise<VisionCard | n
 };
 
 export const analyzePurposeAlignment = async (callings: string[], tasks: string[]): Promise<AlignmentResult | null> => {
+  if (!checkAI()) {
+    return {
+      score: 65,
+      feedback: "You're making progress! Consider how each task aligns with your calling.",
+      analysis: tasks.map((task, i) => ({
+        task,
+        status: i % 3 === 0 ? 'aligned' : i % 3 === 1 ? 'neutral' : 'drift',
+        reason: 'Review this task in light of your kingdom priorities.'
+      }))
+    };
+  }
+  
   try {
     const prompt = `
       I want to measure my "Stewardship Score".
@@ -287,7 +352,7 @@ export const analyzePurposeAlignment = async (callings: string[], tasks: string[
       required: ["score", "feedback", "analysis"]
     };
 
-    const response = await ai.models.generateContent({
+    const response = await ai!.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
       config: {
@@ -308,6 +373,20 @@ export const analyzePurposeAlignment = async (callings: string[], tasks: string[
 };
 
 export const generatePivotStrategy = async (habit: string, trigger: string): Promise<PivotStrategy | null> => {
+  if (!checkAI()) {
+    return {
+      id: Date.now().toString(),
+      habit,
+      trigger,
+      interruptQuestion: "Is this who you want to become?",
+      scriptureTruth: {
+        text: "No temptation has overtaken you except what is common to mankind. And God is faithful; he will not let you be tempted beyond what you can bear.",
+        reference: "1 Corinthians 10:13"
+      },
+      microAction: "Take 10 deep breaths and walk outside for 2 minutes."
+    };
+  }
+  
   try {
     const prompt = `
       The user is setting up a "Pattern Interrupt" protocol for a bad habit/sin they want to break.
@@ -339,7 +418,7 @@ export const generatePivotStrategy = async (habit: string, trigger: string): Pro
       required: ["interruptQuestion", "scriptureTruth", "microAction"]
     };
 
-    const response = await ai.models.generateContent({
+    const response = await ai!.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
       config: {
@@ -366,6 +445,15 @@ export const generatePivotStrategy = async (habit: string, trigger: string): Pro
 };
 
 export const reframeConflict = async (rawThought: string): Promise<PeaceResponse | null> => {
+  if (!checkAI()) {
+    return {
+      originalEmotion: "Frustration",
+      validation: "It's understandable to feel frustrated when your needs aren't being met.",
+      reframedScript: "I feel hurt when this happens because I value our connection. Can we talk about how we can work through this together?",
+      biblicalPrinciple: "A gentle answer turns away wrath, but a harsh word stirs up anger. — Proverbs 15:1"
+    };
+  }
+  
   try {
     const prompt = `
       The user is feeling angry/hurt in their marriage and has typed a raw thought.
@@ -392,7 +480,7 @@ export const reframeConflict = async (rawThought: string): Promise<PeaceResponse
       required: ["originalEmotion", "validation", "reframedScript", "biblicalPrinciple"]
     };
 
-    const response = await ai.models.generateContent({
+    const response = await ai!.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
       config: {

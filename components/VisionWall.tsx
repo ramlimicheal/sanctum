@@ -1,45 +1,57 @@
 
-import React, { useState } from 'react';
-import { Plus, Loader2, RefreshCw, X } from 'lucide-react';
-import { VisionCard } from '../types';
-import { generateVisionBoard } from '../services/geminiService';
-
-const MOCK_CARDS: VisionCard[] = [
-  {
-    id: '1',
-    focus: 'Peace',
-    visualKeyword: 'calm lake sunrise',
-    affirmation: 'I am guarded by the peace that surpasses understanding.',
-    scripture: 'Peace I leave with you; my peace I give to you.',
-    reference: 'John 14:27'
-  },
-  {
-    id: '2',
-    focus: 'Strength',
-    visualKeyword: 'high mountain peak',
-    affirmation: 'I can do all things through Christ who strengthens me.',
-    scripture: 'The Lord is my rock and my fortress.',
-    reference: 'Psalm 18:2'
-  }
-];
+import React, { useState, useEffect } from 'react';
+import { Plus, Loader2, X } from 'lucide-react';
+import { VisionCard } from '@/types';
+import { generateVisionBoard } from '@/services/geminiService';
+import { getVisionCards, saveVisionCards } from '@/services/storageService';
 
 // Helper to get a high quality image URL based on keyword
 const getImageUrl = (keyword: string, id: string) => {
-  // Use a predictable hash from ID to select a 'random' but consistent image from a curated list if needed,
-  // or just append to keyword to bust cache.
-  return `https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80`; 
-  // NOTE: For true dynamic images in a demo without an API key, we use unsplash source. 
-  // But source is deprecated. We will use a reliable pattern.
-  // Ideally: `https://source.unsplash.com/featured/?${encodeURIComponent(keyword)}`
-  // Since source is unreliable, I'll use a specific set of IDs for the demo or the keyword endpoint if available.
-  // Fallback to a standard keyword search URL pattern:
+  // Use pollinations.ai for dynamic AI-generated images
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(keyword)}?width=800&height=1000&nologo=true`;
 };
 
 const VisionWall: React.FC = () => {
-  const [cards, setCards] = useState<VisionCard[]>(MOCK_CARDS);
+  const [cards, setCards] = useState<VisionCard[]>([]);
   const [newFocus, setNewFocus] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Load cards from storage on mount
+  useEffect(() => {
+    const storedCards = getVisionCards();
+    if (storedCards.length > 0) {
+      setCards(storedCards);
+    } else {
+      // Set default mock data for first-time users
+      const mockCards: VisionCard[] = [
+        {
+          id: '1',
+          focus: 'Peace',
+          visualKeyword: 'calm lake sunrise',
+          affirmation: 'I am guarded by the peace that surpasses understanding.',
+          scripture: 'Peace I leave with you; my peace I give to you.',
+          reference: 'John 14:27'
+        },
+        {
+          id: '2',
+          focus: 'Strength',
+          visualKeyword: 'high mountain peak',
+          affirmation: 'I can do all things through Christ who strengthens me.',
+          scripture: 'The Lord is my rock and my fortress.',
+          reference: 'Psalm 18:2'
+        }
+      ];
+      setCards(mockCards);
+      saveVisionCards(mockCards);
+    }
+  }, []);
+
+  // Save cards whenever they change
+  useEffect(() => {
+    if (cards.length > 0) {
+      saveVisionCards(cards);
+    }
+  }, [cards]);
 
   const handleAdd = async () => {
     if (!newFocus.trim()) return;

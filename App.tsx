@@ -11,7 +11,14 @@ import VisionWall from './components/VisionWall';
 import PurposeAligner from './components/PurposeAligner';
 import Pivot from './components/Pivot';
 import Covenant from './components/Covenant';
+import JournalWeaver from './components/JournalWeaver';
+import Settings from './components/Settings';
 import ParticleBackground from './components/ParticleBackground';
+import Devotional from './components/Devotional';
+import CommunityPrayer from './components/CommunityPrayer';
+import TestimonyJournal from './components/TestimonyJournal';
+import FastingTracker from './components/FastingTracker';
+import BibleReader from './components/BibleReader';
 import { ViewState } from './types';
 
 const App: React.FC = () => {
@@ -39,6 +46,20 @@ const App: React.FC = () => {
         return <Pivot />;
       case ViewState.COVENANT:
         return <Covenant />;
+      case ViewState.JOURNAL:
+        return <JournalWeaver />;
+      case ViewState.SETTINGS:
+        return <Settings />;
+      case ViewState.DEVOTIONAL:
+        return <Devotional />;
+      case ViewState.COMMUNITY:
+        return <CommunityPrayer />;
+      case ViewState.TESTIMONY:
+        return <TestimonyJournal />;
+      case ViewState.FASTING:
+        return <FastingTracker />;
+      case ViewState.BIBLE:
+        return <BibleReader />;
       default:
         return <Dashboard onChangeView={setCurrentView} />;
     }

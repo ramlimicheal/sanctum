@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronRight, ChevronLeft, Sparkles, Heart, ArrowLeft, BookOpen, RotateCcw, Layers } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Sparkles, ArrowLeft, BookOpen, RotateCcw, Layers, Check } from 'lucide-react';
+import { getPraiseProgress, savePraiseProgress } from '@/services/storageService';
 
 // Structure for a Praise Card
 interface Praise {
@@ -79,8 +80,54 @@ const PraiseDeck: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0); // 0-9 within a deck
   const [isFlipped, setIsFlipped] = useState(false);
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
+  
+  // Progress tracking
+  const [completedPraises, setCompletedPraises] = useState<number[]>([]);
+  const [showCompleted, setShowCompleted] = useState(false);
 
   const totalVolumes = Math.ceil(allPraises.length / (ITEMS_PER_DECK * DECKS_PER_VOLUME));
+
+  // Load progress from storage
+  useEffect(() => {
+    const progress = getPraiseProgress();
+    setCompletedPraises(progress.completedPraises);
+    if (progress.lastDeck > 0) {
+      const volumeIndex = Math.floor(progress.lastDeck / DECKS_PER_VOLUME);
+      setSelectedVolume(volumeIndex);
+    }
+  }, []);
+
+  // Save progress when completed praises change
+  useEffect(() => {
+    if (completedPraises.length > 0) {
+      savePraiseProgress({ 
+        lastDeck: selectedDeck || 0, 
+        completedPraises 
+      });
+    }
+  }, [completedPraises, selectedDeck]);
+
+  const markAsCompleted = (praiseId: number) => {
+    if (!completedPraises.includes(praiseId)) {
+      setCompletedPraises([...completedPraises, praiseId]);
+      setShowCompleted(true);
+      setTimeout(() => setShowCompleted(false), 1500);
+    }
+  };
+
+  const getVolumeProgress = (volIndex: number) => {
+    const start = volIndex * 100 + 1;
+    const end = (volIndex + 1) * 100;
+    const completed = completedPraises.filter(id => id >= start && id <= end).length;
+    return Math.round((completed / 100) * 100);
+  };
+
+  const getDeckProgress = (deckIdx: number) => {
+    const start = deckIdx * ITEMS_PER_DECK + 1;
+    const end = (deckIdx + 1) * ITEMS_PER_DECK;
+    const completed = completedPraises.filter(id => id >= start && id <= end).length;
+    return completed;
+  };
 
   const handleSelectVolume = (volIndex: number) => {
     setSelectedVolume(volIndex);
@@ -133,11 +180,13 @@ const PraiseDeck: React.FC = () => {
         <div className="text-center mb-12">
            <h2 className="text-4xl font-serif text-stone-900 mb-3">The 1000 Praises</h2>
            <p className="text-stone-500">Select a Volume to begin your ascent.</p>
+           <p className="text-gold-600 text-sm mt-2 font-medium">{completedPraises.length} / 1000 Praises Completed</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
            {[...Array(totalVolumes)].map((_, i) => {
              const start = i * 100 + 1;
              const end = (i + 1) * 100;
+             const progress = getVolumeProgress(i);
              return (
                <button 
                  key={i}
@@ -147,9 +196,18 @@ const PraiseDeck: React.FC = () => {
                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                     <Layers size={64} />
                  </div>
+                 {progress === 100 && (
+                   <div className="absolute top-4 left-4 bg-gold-100 text-gold-700 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                     <Check size={12} /> Complete
+                   </div>
+                 )}
                  <h3 className="text-2xl font-serif text-stone-800 mb-2">Volume {i + 1}</h3>
                  <p className="text-stone-500 text-sm uppercase tracking-widest font-bold">Praises {start} - {end}</p>
-                 <div className="mt-8 flex items-center gap-2 text-gold-600 font-medium group-hover:translate-x-2 transition-transform">
+                 <div className="mt-4 w-full bg-stone-100 rounded-full h-2">
+                   <div className="bg-gold-500 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                 </div>
+                 <p className="text-xs text-stone-400 mt-1">{progress}% complete</p>
+                 <div className="mt-4 flex items-center gap-2 text-gold-600 font-medium group-hover:translate-x-2 transition-transform">
                     Open Volume <ChevronRight size={16} />
                  </div>
                </button>
@@ -181,15 +239,26 @@ const PraiseDeck: React.FC = () => {
             {decks.map((deckIdx) => {
                const start = deckIdx * ITEMS_PER_DECK + 1;
                const end = (deckIdx + 1) * ITEMS_PER_DECK;
+               const deckCompleted = getDeckProgress(deckIdx);
                return (
                  <button
                    key={deckIdx}
                    onClick={() => handleSelectDeck(deckIdx)}
-                   className="aspect-[3/4] bg-stone-100 rounded-lg border border-stone-200 flex flex-col items-center justify-center hover:bg-white hover:shadow-xl hover:scale-105 transition-all group"
+                   className={`aspect-[3/4] rounded-lg border flex flex-col items-center justify-center hover:shadow-xl hover:scale-105 transition-all group relative ${
+                     deckCompleted === 10 ? 'bg-gold-50 border-gold-200' : 'bg-stone-100 border-stone-200 hover:bg-white'
+                   }`}
                  >
-                    <span className="text-3xl font-serif text-stone-300 group-hover:text-gold-500 transition-colors mb-2">{deckIdx + 1}</span>
+                    {deckCompleted === 10 && (
+                      <div className="absolute top-2 right-2 bg-gold-500 text-white p-1 rounded-full">
+                        <Check size={12} />
+                      </div>
+                    )}
+                    <span className={`text-3xl font-serif transition-colors mb-2 ${
+                      deckCompleted === 10 ? 'text-gold-600' : 'text-stone-300 group-hover:text-gold-500'
+                    }`}>{deckIdx + 1}</span>
                     <span className="text-xs font-bold text-stone-400 uppercase tracking-widest">Deck</span>
                     <span className="text-[10px] text-stone-400 mt-1">{start}-{end}</span>
+                    <span className="text-[10px] text-gold-600 mt-2">{deckCompleted}/10</span>
                  </button>
                )
             })}
@@ -201,9 +270,17 @@ const PraiseDeck: React.FC = () => {
   // --- VIEW: CARD (The Experience) ---
   const currentDeckStart = (selectedDeck || 0) * ITEMS_PER_DECK;
   const currentCard = allPraises[currentDeckStart + currentIndex];
+  const isCurrentCompleted = completedPraises.includes(currentCard?.id);
 
   return (
     <div className="max-w-7xl mx-auto h-full flex flex-col items-center justify-center p-6 relative">
+      
+      {/* Completed Toast */}
+      {showCompleted && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-gold-100 text-gold-800 px-6 py-3 rounded-full shadow-lg flex items-center gap-2 animate-slide-down">
+          <Check size={18} /> Praise Completed!
+        </div>
+      )}
       
       {/* Header / Nav */}
       <div className="absolute top-6 left-6 md:left-10 z-20">
@@ -294,12 +371,22 @@ const PraiseDeck: React.FC = () => {
          </button>
          
          <div className="flex gap-2">
-            {[...Array(ITEMS_PER_DECK)].map((_, i) => (
-              <div 
-                key={i} 
-                className={`h-2 rounded-full transition-all duration-300 ${i === currentIndex ? 'bg-gold-600 w-6' : 'bg-stone-300 w-2'}`} 
-              />
-            ))}
+            {[...Array(ITEMS_PER_DECK)].map((_, i) => {
+              const praiseId = currentDeckStart + i + 1;
+              const isCompleted = completedPraises.includes(praiseId);
+              return (
+                <div 
+                  key={i} 
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === currentIndex 
+                      ? 'bg-gold-600 w-6' 
+                      : isCompleted 
+                        ? 'bg-gold-400 w-2' 
+                        : 'bg-stone-300 w-2'
+                  }`} 
+                />
+              );
+            })}
          </div>
 
          <button 
@@ -309,7 +396,22 @@ const PraiseDeck: React.FC = () => {
            <ChevronRight size={24} />
          </button>
       </div>
-      <p className="mt-6 text-stone-400 text-xs hidden md:block">Arrow Keys to Navigate • Spacebar to Flip</p>
+      
+      {/* Mark Complete Button */}
+      <button 
+        onClick={() => markAsCompleted(currentCard.id)}
+        disabled={isCurrentCompleted}
+        className={`mt-6 px-6 py-3 rounded-full font-medium transition-all flex items-center gap-2 ${
+          isCurrentCompleted 
+            ? 'bg-gold-100 text-gold-700 cursor-default' 
+            : 'bg-stone-900 text-white hover:bg-gold-600'
+        }`}
+      >
+        <Check size={16} />
+        {isCurrentCompleted ? 'Completed' : 'Mark as Prayed'}
+      </button>
+      
+      <p className="mt-4 text-stone-400 text-xs hidden md:block">Arrow Keys to Navigate • Spacebar to Flip</p>
     </div>
   );
 };

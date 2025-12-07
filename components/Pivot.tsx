@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
-import { Shield, AlertTriangle, CheckCircle, Zap, Loader2, Edit, Play, Brain, Target, X } from 'lucide-react';
-import { generatePivotStrategy } from '../services/geminiService';
-import { PivotStrategy } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Shield, AlertTriangle, CheckCircle, Zap, Loader2, Edit, Play, Brain, Target } from 'lucide-react';
+import { generatePivotStrategy } from '@/services/geminiService';
+import { PivotStrategy } from '@/types';
+import { getPivotStrategies, savePivotStrategies } from '@/services/storageService';
 
 const Pivot: React.FC = () => {
   // Setup State
@@ -10,9 +11,21 @@ const Pivot: React.FC = () => {
   const [trigger, setTrigger] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   
-  // Strategy State (Persisted in memory for demo, normally DB)
+  // Strategy State
   const [strategy, setStrategy] = useState<PivotStrategy | null>(null);
   const [viewMode, setViewMode] = useState<'setup' | 'dashboard' | 'intervention'>('setup');
+
+  // Load strategy from storage on mount
+  useEffect(() => {
+    const storedStrategies = getPivotStrategies();
+    if (storedStrategies.length > 0) {
+      const latestStrategy = storedStrategies[0];
+      setStrategy(latestStrategy);
+      setHabit(latestStrategy.habit);
+      setTrigger(latestStrategy.trigger);
+      setViewMode('dashboard');
+    }
+  }, []);
 
   const handleCreateProtocol = async () => {
     if (!habit || !trigger) return;
@@ -20,6 +33,9 @@ const Pivot: React.FC = () => {
     const result = await generatePivotStrategy(habit, trigger);
     if (result) {
       setStrategy(result);
+      // Save to storage
+      const strategies = getPivotStrategies();
+      savePivotStrategies([result, ...strategies]);
       setViewMode('dashboard');
     }
     setIsGenerating(false);

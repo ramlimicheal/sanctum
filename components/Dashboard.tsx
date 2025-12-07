@@ -1,34 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Sun, Moon, ArrowRight, Quote, Users, Mail, Clock, Bell, BookOpen, PenTool, Mic } from 'lucide-react';
-import { ViewState } from '../types';
+import { Sun, Moon, ArrowRight, Quote, Users, Mail, Clock, Bell, BookOpen, RefreshCw, Flame, Star, Utensils, TrendingUp } from 'lucide-react';
+import { ViewState } from '@/types';
+import { getDailyVerse, getRandomVerse } from '@/services/dailyVerseService';
+import { getWeeklyPrayerStats, getTotalWeeklyMinutes, getPrayerLetters, getIntercessionItems, getUserPreferences, getPrayerStreak, getTestimonies, getActiveFast, getDevotionalProgress } from '@/services/storageService';
+import { DEVOTIONAL_PLANS } from '@/services/devotionalPlans';
 
 interface DashboardProps {
   onChangeView: (view: ViewState) => void;
 }
 
-const data = [
-  { name: 'Mon', minutes: 15 },
-  { name: 'Tue', minutes: 30 },
-  { name: 'Wed', minutes: 45 },
-  { name: 'Thu', minutes: 20 },
-  { name: 'Fri', minutes: 60 },
-  { name: 'Sat', minutes: 10 },
-  { name: 'Sun', minutes: 25 },
-];
-
-const timeline = [
-  { id: 1, type: 'Prayer', title: 'Morning Manna', time: '8:00 AM', icon: Sun, color: 'text-amber-500' },
-  { id: 2, type: 'Letter', title: 'Sealed Letter: "Anxiety"', time: 'Yesterday', icon: Mail, color: 'text-gold-600' },
-  { id: 3, type: 'Intercession', title: 'Prayed for Sarah', time: '2 days ago', icon: Users, color: 'text-indigo-500' },
-];
-
 const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
   const [timeOfDay, setTimeOfDay] = useState<'morning' | 'afternoon' | 'evening'>('morning');
   const [nextPrayerTime, setNextPrayerTime] = useState<string>('');
+  const [dailyVerse, setDailyVerse] = useState(getDailyVerse());
+  const [weeklyData, setWeeklyData] = useState(getWeeklyPrayerStats());
+  const [totalMinutes, setTotalMinutes] = useState(getTotalWeeklyMinutes());
+  const [letterCount, setLetterCount] = useState(0);
+  const [intercessionCount, setIntercessionCount] = useState(0);
+  const [userName, setUserName] = useState('Pilgrim');
+  const [streak, setStreak] = useState(getPrayerStreak());
+  const [testimoniesCount, setTestimoniesCount] = useState(0);
+  const [activeFast, setActiveFast] = useState(getActiveFast());
+  const [activeDevotional, setActiveDevotional] = useState<{ title: string; day: number; total: number } | null>(null);
 
   useEffect(() => {
     const hour = new Date().getHours();
+    const prefs = getUserPreferences();
+    setUserName(prefs.name);
+    
     if (hour < 12) {
       setTimeOfDay('morning');
       setNextPrayerTime('12:00 PM (Midday)');
@@ -39,15 +39,60 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
       setTimeOfDay('evening');
       setNextPrayerTime('9:00 PM (Compline)');
     }
+
+    // Load real data
+    setWeeklyData(getWeeklyPrayerStats());
+    setTotalMinutes(getTotalWeeklyMinutes());
+    setLetterCount(getPrayerLetters().length);
+    setIntercessionCount(getIntercessionItems().filter(i => !i.lastPrayed || 
+      (new Date().getTime() - new Date(i.lastPrayed).getTime()) > 86400000 * 3
+    ).length);
+    setStreak(getPrayerStreak());
+    setTestimoniesCount(getTestimonies().length);
+    setActiveFast(getActiveFast());
+    
+    // Check for active devotional
+    const devProgress = getDevotionalProgress();
+    const activeProgress = devProgress.find(p => !p.isCompleted);
+    if (activeProgress) {
+      const plan = DEVOTIONAL_PLANS.find(p => p.id === activeProgress.planId);
+      if (plan) {
+        setActiveDevotional({ title: plan.title, day: activeProgress.currentDay, total: plan.duration });
+      }
+    }
   }, []);
 
+  const refreshVerse = () => {
+    setDailyVerse(getRandomVerse());
+  };
+
   const getGreeting = () => {
-    if (timeOfDay === 'morning') return { text: "Good Morning, Pilgrim", icon: Sun, color: "text-amber-600" };
-    if (timeOfDay === 'evening') return { text: "Peace be with you", icon: Moon, color: "text-indigo-400" };
-    return { text: "Walk in the Light", icon: Sun, color: "text-gold-600" };
+    if (timeOfDay === 'morning') return { text: `Good Morning, ${userName}`, icon: Sun, color: "text-amber-600" };
+    if (timeOfDay === 'evening') return { text: `Peace be with you, ${userName}`, icon: Moon, color: "text-indigo-400" };
+    return { text: `Walk in the Light, ${userName}`, icon: Sun, color: "text-gold-600" };
   };
 
   const greeting = getGreeting();
+
+  // Calculate hours from minutes
+  const totalHours = (totalMinutes / 60).toFixed(1);
+
+  // Get recent activity for timeline
+  const timeline = [
+    { id: 1, type: 'Prayer', title: 'Morning Manna', time: 'Today', icon: Sun, color: 'text-amber-500' },
+    { id: 2, type: 'Letter', title: `${letterCount} Letters Written`, time: 'All time', icon: Mail, color: 'text-gold-600' },
+    { id: 3, type: 'Intercession', title: `${intercessionCount} Active Requests`, time: 'Needs prayer', icon: Users, color: 'text-indigo-500' },
+  ];
+
+  // Milestone messages
+  const getStreakMessage = () => {
+    if (streak.currentStreak >= 365) return "🏆 One year of faithfulness!";
+    if (streak.currentStreak >= 90) return "🌟 90 days strong!";
+    if (streak.currentStreak >= 30) return "🔥 One month milestone!";
+    if (streak.currentStreak >= 7) return "✨ One week complete!";
+    if (streak.currentStreak >= 3) return "Keep going!";
+    return "Start your streak today!";
+  };
 
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-8 animate-fade-in pb-24 relative z-10">
@@ -66,17 +111,73 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
             </p>
         </div>
         
-        {/* Liturgy Clock */}
-        <div className="bg-white/80 backdrop-blur-sm px-6 py-4 rounded-xl border border-stone-200 shadow-sm flex items-center gap-4">
-            <div className="p-3 bg-stone-100 rounded-full text-stone-600">
-                <Bell size={20} />
+        {/* Streak & Liturgy Clock */}
+        <div className="flex gap-3">
+          {streak.currentStreak > 0 && (
+            <div className="bg-gradient-to-br from-orange-500 to-amber-600 px-5 py-4 rounded-xl shadow-lg text-white">
+              <div className="flex items-center gap-3">
+                <Flame size={24} className="text-yellow-200" />
+                <div>
+                  <p className="text-xs font-medium text-orange-100 uppercase tracking-wider">Prayer Streak</p>
+                  <p className="text-2xl font-serif">{streak.currentStreak} <span className="text-sm font-sans">days</span></p>
+                </div>
+              </div>
+              <p className="text-xs text-orange-100 mt-1">{getStreakMessage()}</p>
             </div>
-            <div>
-                <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Next Prayer</p>
-                <p className="text-lg font-serif text-stone-800">{nextPrayerTime}</p>
-            </div>
+          )}
+          <div className="bg-white/80 backdrop-blur-sm px-6 py-4 rounded-xl border border-stone-200 shadow-sm flex items-center gap-4">
+              <div className="p-3 bg-stone-100 rounded-full text-stone-600">
+                  <Bell size={20} />
+              </div>
+              <div>
+                  <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Next Prayer</p>
+                  <p className="text-lg font-serif text-stone-800">{nextPrayerTime}</p>
+              </div>
+          </div>
         </div>
       </header>
+
+      {/* Active Devotional Banner */}
+      {activeDevotional && (
+        <div 
+          onClick={() => onChangeView(ViewState.DEVOTIONAL)}
+          className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:shadow-md transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+              <BookOpen size={24} className="text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm text-amber-600 font-medium">Continue Reading</p>
+              <p className="font-semibold text-stone-800">{activeDevotional.title}</p>
+              <p className="text-xs text-stone-500">Day {activeDevotional.day} of {activeDevotional.total}</p>
+            </div>
+          </div>
+          <ArrowRight size={20} className="text-amber-600" />
+        </div>
+      )}
+
+      {/* Active Fast Banner */}
+      {activeFast && !activeFast.isCompleted && (
+        <div 
+          onClick={() => onChangeView(ViewState.FASTING)}
+          className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:shadow-md transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <Utensils size={24} className="text-purple-600" />
+            </div>
+            <div>
+              <p className="text-sm text-purple-600 font-medium">Active Fast</p>
+              <p className="font-semibold text-stone-800">{activeFast.purpose.slice(0, 50)}...</p>
+              <p className="text-xs text-stone-500">
+                {Math.ceil((new Date(activeFast.endDate).getTime() - new Date().getTime()) / 86400000)} days remaining
+              </p>
+            </div>
+          </div>
+          <ArrowRight size={20} className="text-purple-600" />
+        </div>
+      )}
 
       {/* Hero Action - Dynamic based on time */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -119,11 +220,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
           <Quote className="absolute top-6 left-6 text-stone-100 w-16 h-16 transform -scale-x-100" />
           <div className="relative z-10 text-center">
             <p className="text-lg font-serif text-stone-800 leading-relaxed mb-4">
-              "The Lord is my shepherd; I shall not want. He makes me lie down in green pastures."
+              "{dailyVerse.text}"
             </p>
-            <span className="text-sm font-medium text-gold-600 tracking-widest uppercase">Psalm 23:1-2</span>
+            <span className="text-sm font-medium text-gold-600 tracking-widest uppercase">{dailyVerse.reference}</span>
           </div>
-          <div className="mt-6 pt-6 border-t border-stone-100 flex justify-center">
+          <div className="mt-6 pt-6 border-t border-stone-100 flex justify-center gap-4">
+            <button 
+              onClick={refreshVerse}
+              className="text-stone-400 text-xs flex items-center gap-1 hover:text-stone-600 transition-colors"
+            >
+              <RefreshCw size={12} /> New Verse
+            </button>
             <button className="text-stone-400 text-xs flex items-center gap-1 hover:text-stone-600 transition-colors">
               <BookOpen size={12} /> Read Full Chapter
             </button>
@@ -142,12 +249,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
             </div>
             <div className="flex items-center gap-2">
                 <Clock size={16} className="text-gold-600" />
-                <span className="text-2xl font-serif text-stone-800">3.4<span className="text-sm text-stone-400 font-sans ml-1">hrs</span></span>
+                <span className="text-2xl font-serif text-stone-800">{totalHours}<span className="text-sm text-stone-400 font-sans ml-1">hrs</span></span>
             </div>
           </div>
           <div className="h-48 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data}>
+              <BarChart data={weeklyData}>
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
@@ -160,8 +267,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
                   contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} 
                 />
                 <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
-                  {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index === 4 ? '#b4941f' : '#e7e5e4'} />
+                  {weeklyData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.minutes > 30 ? '#b4941f' : '#e7e5e4'} />
                   ))}
                 </Bar>
               </BarChart>
@@ -192,13 +299,48 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
         </div>
 
         {/* Quick Actions Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:col-span-3">
+           <div className="bg-stone-100 p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.DEVOTIONAL)}>
+             <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-3 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors">
+               <BookOpen size={22} />
+             </div>
+             <h4 className="font-semibold text-stone-800 text-sm">Devotionals</h4>
+             <p className="text-stone-500 text-xs mt-1">Reading Plans</p>
+           </div>
+           
+           <div className="bg-stone-100 p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.COMMUNITY)}>
+             <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-3 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+               <Users size={22} />
+             </div>
+             <h4 className="font-semibold text-stone-800 text-sm">Prayer Wall</h4>
+             <p className="text-stone-500 text-xs mt-1">Community</p>
+           </div>
+           
+           <div className="bg-stone-100 p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.TESTIMONY)}>
+             <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-3 group-hover:bg-yellow-100 group-hover:text-yellow-600 transition-colors">
+               <Star size={22} />
+             </div>
+             <h4 className="font-semibold text-stone-800 text-sm">Testimonies</h4>
+             <p className="text-stone-500 text-xs mt-1">{testimoniesCount} Recorded</p>
+           </div>
+           
+           <div className="bg-stone-100 p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.FASTING)}>
+             <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-3 group-hover:bg-purple-100 group-hover:text-purple-600 transition-colors">
+               <Utensils size={22} />
+             </div>
+             <h4 className="font-semibold text-stone-800 text-sm">Fasting</h4>
+             <p className="text-stone-500 text-xs mt-1">{activeFast ? 'Active' : 'Start Fast'}</p>
+           </div>
+        </div>
+
+        {/* Secondary Quick Actions */}
         <div className="grid grid-cols-2 gap-4 md:col-span-3">
            <div className="bg-stone-100 p-6 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.INTERCESSION)}>
              <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-4 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
                <Users size={24} />
              </div>
              <h4 className="font-semibold text-stone-800">Intercessions</h4>
-             <p className="text-stone-500 text-sm mt-1">3 Active Requests</p>
+             <p className="text-stone-500 text-sm mt-1">{intercessionCount} Active Requests</p>
            </div>
            
            <div className="bg-stone-100 p-6 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.LETTERS)}>
@@ -206,7 +348,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
                <Mail size={24} />
              </div>
              <h4 className="font-semibold text-stone-800">Letters to God</h4>
-             <p className="text-stone-500 text-sm mt-1">Write & Seal</p>
+             <p className="text-stone-500 text-sm mt-1">{letterCount} Written</p>
            </div>
         </div>
       </div>

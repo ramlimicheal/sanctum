@@ -1,26 +1,63 @@
 
-import React, { useState } from 'react';
-import { Target, Plus, Trash2, Check, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
-import { analyzePurposeAlignment } from '../services/geminiService';
-import { AlignmentResult } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Target, Plus, Trash2, Loader2 } from 'lucide-react';
+import { analyzePurposeAlignment } from '@/services/geminiService';
+import { AlignmentResult } from '@/types';
+import { getCallings, saveCallings, getTasks, saveTasks } from '@/services/storageService';
 
 const PurposeAligner: React.FC = () => {
-  const [callings, setCallings] = useState<string[]>([
-    "Be a present and godly father",
-    "Launch the ministry project"
-  ]);
-  const [tasks, setTasks] = useState<string[]>([
-    "Write project proposal",
-    "Scroll social media",
-    "Play with kids in the park",
-    "Answer emails"
-  ]);
+  const [callings, setCallings] = useState<string[]>([]);
+  const [tasks, setTasks] = useState<string[]>([]);
   
   const [newCalling, setNewCalling] = useState('');
   const [newTask, setNewTask] = useState('');
   
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AlignmentResult | null>(null);
+
+  // Load from storage on mount
+  useEffect(() => {
+    const storedCallings = getCallings();
+    const storedTasks = getTasks();
+    
+    if (storedCallings.length > 0) {
+      setCallings(storedCallings);
+    } else {
+      const defaultCallings = [
+        "Be a present and godly father",
+        "Launch the ministry project"
+      ];
+      setCallings(defaultCallings);
+      saveCallings(defaultCallings);
+    }
+    
+    if (storedTasks.length > 0) {
+      setTasks(storedTasks);
+    } else {
+      const defaultTasks = [
+        "Write project proposal",
+        "Scroll social media",
+        "Play with kids in the park",
+        "Answer emails"
+      ];
+      setTasks(defaultTasks);
+      saveTasks(defaultTasks);
+    }
+  }, []);
+
+  // Save whenever callings change
+  useEffect(() => {
+    if (callings.length > 0) {
+      saveCallings(callings);
+    }
+  }, [callings]);
+
+  // Save whenever tasks change
+  useEffect(() => {
+    if (tasks.length > 0) {
+      saveTasks(tasks);
+    }
+  }, [tasks]);
 
   const addCalling = () => {
     if (newCalling.trim()) {

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowRight, ChevronRight, CheckCircle2, RefreshCw, Sparkles, BookOpen, Copy, Download } from 'lucide-react';
-import { ACTSStep } from '../types';
-import { generateACTSPrompts, synthesizePrayerSession } from '../services/geminiService';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronRight, CheckCircle2, RefreshCw, Sparkles, BookOpen, Copy, Download, Check } from 'lucide-react';
+import { ACTSStep } from '@/types';
+import { generateACTSPrompts, synthesizePrayerSession } from '@/services/geminiService';
+import { savePrayerSession, updatePrayerStreak } from '@/services/storageService';
 
 const steps = [ACTSStep.ADORATION, ACTSStep.CONFESSION, ACTSStep.THANKSGIVING, ACTSStep.SUPPLICATION];
 
@@ -13,6 +14,8 @@ const PrayerArchitect: React.FC = () => {
   const [isFinished, setIsFinished] = useState(false);
   const [synthesizedPrayer, setSynthesizedPrayer] = useState<string>("");
   const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const startTimeRef = useRef<Date>(new Date());
 
   const currentStep = steps[currentStepIndex];
 
@@ -45,7 +48,37 @@ const PrayerArchitect: React.FC = () => {
     const synthesis = await synthesizePrayerSession(userInputs);
     setSynthesizedPrayer(synthesis);
     setIsSynthesizing(false);
+    
+    // Save prayer session for analytics
+    const endTime = new Date();
+    const durationMinutes = Math.round((endTime.getTime() - startTimeRef.current.getTime()) / 60000);
+    savePrayerSession({
+      date: new Date().toISOString().split('T')[0],
+      durationMinutes: Math.max(durationMinutes, 1), // At least 1 minute
+      focus: 'ACTS Prayer'
+    });
+    
+    // Update prayer streak
+    updatePrayerStreak();
   }
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(synthesizedPrayer);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadPrayer = () => {
+    const blob = new Blob([synthesizedPrayer], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prayer-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setUserInputs({
@@ -91,10 +124,17 @@ const PrayerArchitect: React.FC = () => {
             )}
             
             <div className="mt-8 pt-6 border-t border-stone-200 flex justify-end gap-3">
-              <button className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 px-3 py-2 rounded hover:bg-stone-100 transition-colors">
-                <Copy size={16} /> Copy
+              <button 
+                onClick={copyToClipboard}
+                className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 px-3 py-2 rounded hover:bg-stone-100 transition-colors"
+              >
+                {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />} 
+                {copied ? 'Copied!' : 'Copy'}
               </button>
-              <button className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 px-3 py-2 rounded hover:bg-stone-100 transition-colors">
+              <button 
+                onClick={downloadPrayer}
+                className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 px-3 py-2 rounded hover:bg-stone-100 transition-colors"
+              >
                 <Download size={16} /> Save Card
               </button>
             </div>

@@ -1,34 +1,14 @@
-import React, { useState } from 'react';
-import { Mail, PenLine, Lock, Unlock, Calendar, Sparkles, Send, CheckCircle2, ChevronLeft, Loader2, Bookmark } from 'lucide-react';
-import { PrayerLetter, ScriptureWeaveResult } from '../types';
-import { weaveScripture } from '../services/geminiService';
-
-const MOCK_LETTERS: PrayerLetter[] = [
-  {
-    id: '1',
-    title: 'Anxiety about the move',
-    content: 'Lord, I am terrified of this new city. I feel alone...',
-    createdAt: new Date(Date.now() - 86400000 * 5),
-    unlockDate: new Date(Date.now() - 86400000 * 1), // Unlocked
-    isAnswered: true,
-    status: 'opened',
-    scriptureSeal: { verseText: "Be strong and courageous.", reference: "Joshua 1:9", prayer: "Lord, grant me courage." }
-  },
-  {
-    id: '2',
-    title: 'Waiting for a spouse',
-    content: 'It is hard to be patient. I feel like time is running out...',
-    createdAt: new Date(Date.now()),
-    unlockDate: new Date(Date.now() + 86400000 * 30), // Locked for 30 days
-    isAnswered: false,
-    status: 'sealed'
-  }
-];
+import React, { useState, useEffect } from 'react';
+import { Mail, PenLine, Lock, Unlock, Calendar, Sparkles, Send, CheckCircle2, ChevronLeft, Loader2, Bookmark, Copy, Check } from 'lucide-react';
+import { PrayerLetter, ScriptureWeaveResult } from '@/types';
+import { weaveScripture } from '@/services/geminiService';
+import { getPrayerLetters, savePrayerLetters } from '@/services/storageService';
 
 const PrayerLetters: React.FC = () => {
   const [view, setView] = useState<'list' | 'write' | 'read'>('list');
-  const [letters, setLetters] = useState<PrayerLetter[]>(MOCK_LETTERS);
+  const [letters, setLetters] = useState<PrayerLetter[]>([]);
   const [selectedLetter, setSelectedLetter] = useState<PrayerLetter | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // Writer State
   const [newTitle, setNewTitle] = useState('');
@@ -36,6 +16,46 @@ const PrayerLetters: React.FC = () => {
   const [unlockDays, setUnlockDays] = useState<number>(0);
   const [isWeaving, setIsWeaving] = useState(false);
   const [scriptureSeal, setScriptureSeal] = useState<ScriptureWeaveResult | null>(null);
+
+  // Load letters from storage on mount
+  useEffect(() => {
+    const storedLetters = getPrayerLetters();
+    if (storedLetters.length > 0) {
+      setLetters(storedLetters);
+    } else {
+      // Set default mock data for first-time users
+      const mockLetters: PrayerLetter[] = [
+        {
+          id: '1',
+          title: 'Anxiety about the move',
+          content: 'Lord, I am terrified of this new city. I feel alone...',
+          createdAt: new Date(Date.now() - 86400000 * 5),
+          unlockDate: new Date(Date.now() - 86400000 * 1),
+          isAnswered: true,
+          status: 'opened',
+          scriptureSeal: { verseText: "Be strong and courageous.", reference: "Joshua 1:9", prayer: "Lord, grant me courage." }
+        },
+        {
+          id: '2',
+          title: 'Waiting for a spouse',
+          content: 'It is hard to be patient. I feel like time is running out...',
+          createdAt: new Date(),
+          unlockDate: new Date(Date.now() + 86400000 * 30),
+          isAnswered: false,
+          status: 'sealed'
+        }
+      ];
+      setLetters(mockLetters);
+      savePrayerLetters(mockLetters);
+    }
+  }, []);
+
+  // Save letters whenever they change
+  useEffect(() => {
+    if (letters.length > 0) {
+      savePrayerLetters(letters);
+    }
+  }, [letters]);
 
   const handleOpenWrite = () => {
     setNewTitle('');
@@ -94,6 +114,12 @@ const PrayerLetters: React.FC = () => {
     if (selectedLetter && selectedLetter.id === id) {
       setSelectedLetter({ ...selectedLetter, isAnswered: !selectedLetter.isAnswered });
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   // --- WRITE VIEW ---
@@ -234,6 +260,28 @@ const PrayerLetters: React.FC = () => {
                  <p className="text-stone-500 text-sm font-medium">{selectedLetter.scriptureSeal.reference}</p>
                </div>
              )}
+
+             {/* Action Buttons */}
+             <div className="flex gap-3 mt-8">
+               <button
+                 onClick={() => copyToClipboard(selectedLetter.content)}
+                 className="flex items-center gap-2 px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg transition-colors"
+               >
+                 {copied ? <Check size={16} /> : <Copy size={16} />}
+                 {copied ? 'Copied!' : 'Copy'}
+               </button>
+               <button
+                 onClick={() => markAnswered(selectedLetter.id)}
+                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                   selectedLetter.isAnswered 
+                     ? 'bg-green-100 text-green-700' 
+                     : 'bg-gold-100 hover:bg-gold-200 text-gold-700'
+                 }`}
+               >
+                 <CheckCircle2 size={16} />
+                 {selectedLetter.isAnswered ? 'Answered' : 'Mark as Answered'}
+               </button>
+             </div>
           </div>
        </div>
     );
