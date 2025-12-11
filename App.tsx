@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Menu, X } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import PrayerArchitect from './components/PrayerArchitect';
@@ -19,15 +20,34 @@ import CommunityPrayer from './components/CommunityPrayer';
 import TestimonyJournal from './components/TestimonyJournal';
 import FastingTracker from './components/FastingTracker';
 import BibleReader from './components/BibleReader';
+import LandingPage from './components/LandingPage';
+import SignIn from './components/SignIn';
+import SignUp from './components/SignUp';
 import { ViewState } from './types';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<ViewState>(ViewState.DASHBOARD);
+  const [currentView, setCurrentView] = useState<ViewState>(ViewState.LANDING);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Check if we're on an auth/landing page (no sidebar needed)
+  const isAuthPage = [ViewState.LANDING, ViewState.SIGNIN, ViewState.SIGNUP].includes(currentView);
+
+  // Handle view change and close mobile sidebar
+  const handleViewChange = (view: ViewState) => {
+    setCurrentView(view);
+    setSidebarOpen(false);
+  };
 
   const renderView = () => {
     switch (currentView) {
+      case ViewState.LANDING:
+        return <LandingPage onChangeView={handleViewChange} />;
+      case ViewState.SIGNIN:
+        return <SignIn onChangeView={handleViewChange} />;
+      case ViewState.SIGNUP:
+        return <SignUp onChangeView={handleViewChange} />;
       case ViewState.DASHBOARD:
-        return <Dashboard onChangeView={setCurrentView} />;
+        return <Dashboard onChangeView={handleViewChange} />;
       case ViewState.ARCHITECT:
         return <PrayerArchitect />;
       case ViewState.LETTERS:
@@ -61,15 +81,55 @@ const App: React.FC = () => {
       case ViewState.BIBLE:
         return <BibleReader />;
       default:
-        return <Dashboard onChangeView={setCurrentView} />;
+        return <LandingPage onChangeView={handleViewChange} />;
     }
   };
 
+  // For auth pages, render without sidebar
+  if (isAuthPage) {
+    return (
+      <div className="h-screen w-full overflow-auto">
+        {renderView()}
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen w-full bg-stone-50 overflow-hidden font-sans text-stone-800">
-      <Sidebar currentView={currentView} onChangeView={setCurrentView} />
+      {/* Mobile Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 md:hidden bg-stone-900 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gold-600 to-amber-300 flex items-center justify-center text-stone-900 font-serif font-bold text-lg">
+            S
+          </div>
+          <span className="font-serif text-lg text-stone-100">Theolyte</span>
+        </div>
+        <button 
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 text-stone-300 hover:text-white"
+        >
+          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Hidden on mobile unless open */}
+      <div className={`
+        fixed md:relative inset-y-0 left-0 z-50 
+        transform transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
+        <Sidebar currentView={currentView} onChangeView={handleViewChange} />
+      </div>
       
-      <main className="flex-1 overflow-auto relative">
+      <main className="flex-1 overflow-auto relative pt-14 md:pt-0">
         {/* Background Particles */}
         <ParticleBackground />
         

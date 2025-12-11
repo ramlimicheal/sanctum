@@ -16,25 +16,25 @@ import {
 } from '@/types';
 
 const STORAGE_KEYS = {
-  PRAYER_LETTERS: 'sanctum_prayer_letters',
-  INTERCESSION_ITEMS: 'sanctum_intercession_items',
-  VISION_CARDS: 'sanctum_vision_cards',
-  PIVOT_STRATEGIES: 'sanctum_pivot_strategies',
-  PRAYER_SESSIONS: 'sanctum_prayer_sessions',
-  CALLINGS: 'sanctum_callings',
-  TASKS: 'sanctum_tasks',
-  LOVE_NOTES: 'sanctum_love_notes',
-  PRAISE_PROGRESS: 'sanctum_praise_progress',
-  USER_PREFERENCES: 'sanctum_user_preferences',
+  PRAYER_LETTERS: 'theolyte_prayer_letters',
+  INTERCESSION_ITEMS: 'theolyte_intercession_items',
+  VISION_CARDS: 'theolyte_vision_cards',
+  PIVOT_STRATEGIES: 'theolyte_pivot_strategies',
+  PRAYER_SESSIONS: 'theolyte_prayer_sessions',
+  CALLINGS: 'theolyte_callings',
+  TASKS: 'theolyte_tasks',
+  LOVE_NOTES: 'theolyte_love_notes',
+  PRAISE_PROGRESS: 'theolyte_praise_progress',
+  USER_PREFERENCES: 'theolyte_user_preferences',
   // New keys for world-class features
-  PRAYER_STREAK: 'sanctum_prayer_streak',
-  DEVOTIONAL_PROGRESS: 'sanctum_devotional_progress',
-  COMMUNITY_PRAYERS: 'sanctum_community_prayers',
-  TESTIMONIES: 'sanctum_testimonies',
-  FASTING_SESSIONS: 'sanctum_fasting_sessions',
-  PRAYER_REMINDERS: 'sanctum_prayer_reminders',
-  BIBLE_BOOKMARKS: 'sanctum_bible_bookmarks',
-  BIBLE_HIGHLIGHTS: 'sanctum_bible_highlights',
+  PRAYER_STREAK: 'theolyte_prayer_streak',
+  DEVOTIONAL_PROGRESS: 'theolyte_devotional_progress',
+  COMMUNITY_PRAYERS: 'theolyte_community_prayers',
+  TESTIMONIES: 'theolyte_testimonies',
+  FASTING_SESSIONS: 'theolyte_fasting_sessions',
+  PRAYER_REMINDERS: 'theolyte_prayer_reminders',
+  BIBLE_BOOKMARKS: 'theolyte_bible_bookmarks',
+  BIBLE_HIGHLIGHTS: 'theolyte_bible_highlights',
 };
 
 // Generic storage helpers

@@ -63,21 +63,21 @@ const Devotional: React.FC = () => {
   // Browse Plans View
   if (view === 'browse') {
     return (
-      <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-8 animate-fade-in pb-24 relative z-10">
-        <header className="mb-8">
-          <div className="flex items-center gap-2 text-amber-600 mb-2 font-medium">
-            <BookOpen size={18} />
+      <div className="p-4 md:p-6 lg:p-10 max-w-6xl mx-auto space-y-6 md:space-y-8 animate-fade-in pb-24 relative z-10">
+        <header className="mb-6 md:mb-8">
+          <div className="flex items-center gap-2 text-amber-600 mb-2 font-medium text-sm md:text-base">
+            <BookOpen size={16} />
             <span>Devotional Plans</span>
           </div>
-          <h1 className="text-4xl font-serif text-stone-800 mb-2">Grow in Faith</h1>
-          <p className="text-stone-500 max-w-xl">
+          <h1 className="text-2xl md:text-4xl font-serif text-stone-800 mb-2">Grow in Faith</h1>
+          <p className="text-stone-500 max-w-xl text-sm md:text-base">
             Curated reading plans to deepen your walk with God. Each plan includes Scripture, reflection, and practical application.
           </p>
         </header>
 
         {/* Active Plans */}
         {progress.filter(p => !p.isCompleted).length > 0 && (
-          <section className="mb-8">
+          <section className="mb-6 md:mb-8">
             <h2 className="text-lg font-semibold text-stone-800 mb-4">Continue Reading</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {progress.filter(p => !p.isCompleted).map(p => {

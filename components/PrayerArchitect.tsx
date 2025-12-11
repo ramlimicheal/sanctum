@@ -89,53 +89,53 @@ const PrayerArchitect: React.FC = () => {
 
   if (isFinished) {
     return (
-      <div className="max-w-3xl mx-auto p-6 md:p-10 text-center animate-fade-in pb-20">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gold-50 text-gold-600 mb-6 shadow-inner ring-1 ring-gold-200">
-          <CheckCircle2 size={40} />
+      <div className="max-w-3xl mx-auto p-4 md:p-6 lg:p-10 text-center animate-fade-in pb-20">
+        <div className="inline-flex items-center justify-center w-16 md:w-20 h-16 md:h-20 rounded-full bg-gold-50 text-gold-600 mb-4 md:mb-6 shadow-inner ring-1 ring-gold-200">
+          <CheckCircle2 size={32} />
         </div>
-        <h2 className="text-3xl font-serif text-stone-900 mb-4">It is Finished</h2>
-        <p className="text-stone-600 mb-10">Your words have been heard. Here is your prayer, woven together.</p>
+        <h2 className="text-2xl md:text-3xl font-serif text-stone-900 mb-3 md:mb-4">It is Finished</h2>
+        <p className="text-stone-600 mb-6 md:mb-10 text-sm md:text-base">Your words have been heard. Here is your prayer, woven together.</p>
         
         <div className="bg-white rounded-xl shadow-2xl border border-stone-200 overflow-hidden text-left relative transform transition-all hover:scale-[1.01]">
           {/* Paper Texture Effect */}
           <div className="absolute inset-0 bg-stone-50 opacity-50 pointer-events-none" style={{backgroundImage: 'radial-gradient(#d6d3d1 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
           
-          <div className="relative p-8 md:p-12">
-            <div className="flex justify-between items-start mb-6 border-b border-stone-200 pb-4">
-              <span className="text-xs font-bold text-stone-500 tracking-widest uppercase">
+          <div className="relative p-5 md:p-8 lg:p-12">
+            <div className="flex justify-between items-start mb-4 md:mb-6 border-b border-stone-200 pb-3 md:pb-4">
+              <span className="text-[10px] md:text-xs font-bold text-stone-500 tracking-widest uppercase">
                 {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </span>
-              <Sparkles className="text-gold-500" size={16} />
+              <Sparkles className="text-gold-500" size={14} />
             </div>
 
             {isSynthesizing ? (
-              <div className="space-y-4 animate-pulse">
-                <div className="h-4 bg-stone-200 rounded w-3/4"></div>
-                <div className="h-4 bg-stone-200 rounded w-full"></div>
-                <div className="h-4 bg-stone-200 rounded w-5/6"></div>
-                <div className="h-4 bg-stone-200 rounded w-4/5"></div>
+              <div className="space-y-3 md:space-y-4 animate-pulse">
+                <div className="h-3 md:h-4 bg-stone-200 rounded w-3/4"></div>
+                <div className="h-3 md:h-4 bg-stone-200 rounded w-full"></div>
+                <div className="h-3 md:h-4 bg-stone-200 rounded w-5/6"></div>
+                <div className="h-3 md:h-4 bg-stone-200 rounded w-4/5"></div>
               </div>
             ) : (
               <div className="prose prose-stone max-w-none">
-                <p className="font-serif text-xl leading-loose text-stone-900 italic">
+                <p className="font-serif text-base md:text-xl leading-loose text-stone-900 italic">
                   "{synthesizedPrayer}"
                 </p>
               </div>
             )}
             
-            <div className="mt-8 pt-6 border-t border-stone-200 flex justify-end gap-3">
+            <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t border-stone-200 flex justify-end gap-2 md:gap-3">
               <button 
                 onClick={copyToClipboard}
-                className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 px-3 py-2 rounded hover:bg-stone-100 transition-colors"
+                className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm text-stone-600 hover:text-stone-900 px-2.5 md:px-3 py-1.5 md:py-2 rounded hover:bg-stone-100 transition-colors"
               >
-                {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />} 
+                {copied ? <Check size={14} className="text-green-600" /> : <Copy size={14} />} 
                 {copied ? 'Copied!' : 'Copy'}
               </button>
               <button 
                 onClick={downloadPrayer}
-                className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 px-3 py-2 rounded hover:bg-stone-100 transition-colors"
+                className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm text-stone-600 hover:text-stone-900 px-2.5 md:px-3 py-1.5 md:py-2 rounded hover:bg-stone-100 transition-colors"
               >
-                <Download size={16} /> Save Card
+                <Download size={14} /> Save Card
               </button>
             </div>
           </div>
@@ -143,7 +143,7 @@ const PrayerArchitect: React.FC = () => {
         
         <button 
           onClick={() => { setIsFinished(false); setCurrentStepIndex(0); setUserInputs({}); setSynthesizedPrayer(""); }}
-          className="mt-8 text-stone-500 hover:text-stone-800 underline underline-offset-4"
+          className="mt-6 md:mt-8 text-stone-500 hover:text-stone-800 underline underline-offset-4 text-sm md:text-base"
         >
           Start New Session
         </button>
@@ -152,9 +152,9 @@ const PrayerArchitect: React.FC = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 md:p-10 h-full flex flex-col pb-20">
+    <div className="max-w-5xl mx-auto p-4 md:p-6 lg:p-10 h-full flex flex-col pb-20">
       {/* Progress */}
-      <div className="flex items-center justify-between mb-8 max-w-2xl mx-auto w-full">
+      <div className="flex items-center justify-between mb-6 md:mb-8 max-w-2xl mx-auto w-full">
         {steps.map((step, idx) => {
           const isActive = idx === currentStepIndex;
           const isPast = idx < currentStepIndex;

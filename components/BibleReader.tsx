@@ -156,37 +156,37 @@ const BibleReader: React.FC = () => {
     const newTestament = filteredBooks.filter(b => b.testament === 'new');
 
     return (
-      <div className="p-6 md:p-10 max-w-5xl mx-auto space-y-6 animate-fade-in pb-24 relative z-10">
-        <header className="mb-8">
-          <div className="flex items-center gap-2 text-emerald-600 mb-2 font-medium">
-            <BookOpen size={18} />
+      <div className="p-4 md:p-6 lg:p-10 max-w-5xl mx-auto space-y-4 md:space-y-6 animate-fade-in pb-24 relative z-10">
+        <header className="mb-6 md:mb-8">
+          <div className="flex items-center gap-2 text-emerald-600 mb-2 font-medium text-sm md:text-base">
+            <BookOpen size={16} />
             <span>Bible</span>
           </div>
-          <h1 className="text-4xl font-serif text-stone-800 mb-2">Read Scripture</h1>
-          <p className="text-stone-500 max-w-xl">
+          <h1 className="text-2xl md:text-4xl font-serif text-stone-800 mb-2">Read Scripture</h1>
+          <p className="text-stone-500 max-w-xl text-sm md:text-base">
             "Your word is a lamp for my feet, a light on my path." — Psalm 119:105
           </p>
         </header>
 
         {/* Search */}
         <div className="relative">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search books..."
-            className="w-full pl-12 pr-4 py-3 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            className="w-full pl-11 pr-4 py-2.5 md:py-3 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm md:text-base"
           />
         </div>
 
         {/* Bookmarks */}
         {bookmarks.length > 0 && (
-          <div className="bg-white rounded-xl border border-stone-200 p-4">
-            <h3 className="text-sm font-semibold text-stone-600 mb-3 flex items-center gap-2">
-              <Bookmark size={14} /> Recent Bookmarks
+          <div className="bg-white rounded-xl border border-stone-200 p-3 md:p-4">
+            <h3 className="text-xs md:text-sm font-semibold text-stone-600 mb-2 md:mb-3 flex items-center gap-2">
+              <Bookmark size={12} /> Recent Bookmarks
             </h3>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 md:gap-2">
               {bookmarks.slice(0, 5).map(bookmark => (
                 <button
                   key={bookmark.id}
@@ -198,7 +198,7 @@ const BibleReader: React.FC = () => {
                     setSelectedChapter(chapterNum);
                     setView('reading');
                   }}
-                  className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-sm hover:bg-emerald-100 transition-colors"
+                  className="px-2.5 md:px-3 py-1 md:py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs md:text-sm hover:bg-emerald-100 transition-colors"
                 >
                   {bookmark.reference}
                 </button>
@@ -209,16 +209,16 @@ const BibleReader: React.FC = () => {
 
         {/* Old Testament */}
         <div>
-          <h2 className="text-lg font-semibold text-stone-800 mb-3">Old Testament</h2>
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+          <h2 className="text-base md:text-lg font-semibold text-stone-800 mb-2 md:mb-3">Old Testament</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 md:gap-2">
             {oldTestament.map(book => (
               <button
                 key={book.name}
                 onClick={() => handleSelectBook(book.name)}
-                className="p-3 bg-white rounded-lg border border-stone-200 text-left hover:border-emerald-300 hover:bg-emerald-50 transition-all"
+                className="p-2.5 md:p-3 bg-white rounded-lg border border-stone-200 text-left hover:border-emerald-300 hover:bg-emerald-50 transition-all"
               >
-                <p className="font-medium text-stone-800 text-sm truncate">{book.name}</p>
-                <p className="text-xs text-stone-400">{book.chapters} ch</p>
+                <p className="font-medium text-stone-800 text-xs md:text-sm truncate">{book.name}</p>
+                <p className="text-[10px] md:text-xs text-stone-400">{book.chapters} ch</p>
               </button>
             ))}
           </div>
@@ -226,13 +226,13 @@ const BibleReader: React.FC = () => {
 
         {/* New Testament */}
         <div>
-          <h2 className="text-lg font-semibold text-stone-800 mb-3">New Testament</h2>
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+          <h2 className="text-base md:text-lg font-semibold text-stone-800 mb-2 md:mb-3">New Testament</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 md:gap-2">
             {newTestament.map(book => (
               <button
                 key={book.name}
                 onClick={() => handleSelectBook(book.name)}
-                className="p-3 bg-white rounded-lg border border-stone-200 text-left hover:border-emerald-300 hover:bg-emerald-50 transition-all"
+                className="p-2.5 md:p-3 bg-white rounded-lg border border-stone-200 text-left hover:border-emerald-300 hover:bg-emerald-50 transition-all"
               >
                 <p className="font-medium text-stone-800 text-sm truncate">{book.name}</p>
                 <p className="text-xs text-stone-400">{book.chapters} ch</p>

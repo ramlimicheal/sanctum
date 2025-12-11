@@ -103,12 +103,12 @@ const PurposeAligner: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 md:p-10 pb-24 h-full animate-fade-in flex flex-col">
-      <div className="mb-10 text-center max-w-2xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-900 mb-2 flex items-center justify-center gap-3">
-          <Target className="text-gold-600" /> Purpose Aligner
+    <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-10 pb-24 h-full animate-fade-in flex flex-col">
+      <div className="mb-6 md:mb-10 text-center max-w-2xl mx-auto">
+        <h2 className="text-2xl md:text-3xl font-serif text-stone-900 mb-2 flex items-center justify-center gap-3">
+          <Target className="text-gold-600" size={24} /> Purpose Aligner
         </h2>
-        <p className="text-stone-500">
+        <p className="text-stone-500 text-sm md:text-base">
           "Look carefully then how you walk, not as unwise but as wise, making the best use of the time." — Ephesians 5:15
         </p>
       </div>

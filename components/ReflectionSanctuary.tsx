@@ -91,15 +91,15 @@ const ReflectionSanctuary: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 md:p-10 h-full flex flex-col pb-24 animate-fade-in">
-      <div className="text-center mb-10">
-        <h2 className="text-3xl font-serif text-stone-900 mb-2">Reflection Sanctuary</h2>
-        <p className="text-stone-500">Speak your heart. Let Wisdom listen.</p>
+    <div className="max-w-4xl mx-auto p-4 md:p-6 lg:p-10 h-full flex flex-col pb-24 animate-fade-in">
+      <div className="text-center mb-6 md:mb-10">
+        <h2 className="text-2xl md:text-3xl font-serif text-stone-900 mb-2">Reflection Sanctuary</h2>
+        <p className="text-stone-500 text-sm md:text-base">Speak your heart. Let Wisdom listen.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8 flex-1">
         {/* Input Area */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 md:gap-6">
            <div className={`
              flex-1 bg-white rounded-2xl border transition-all relative overflow-hidden flex flex-col p-6 shadow-sm group
              ${isRecording ? 'border-red-400 ring-4 ring-red-50' : 'border-stone-200 focus-within:ring-2 focus-within:ring-gold-500/20 focus-within:border-gold-500/50'}

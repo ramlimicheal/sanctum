@@ -139,50 +139,50 @@ const FastingTracker: React.FC = () => {
   };
 
   return (
-    <div className="p-6 md:p-10 max-w-4xl mx-auto space-y-6 animate-fade-in pb-24 relative z-10">
+    <div className="p-4 md:p-6 lg:p-10 max-w-4xl mx-auto space-y-4 md:space-y-6 animate-fade-in pb-24 relative z-10">
       {/* Header */}
-      <header className="mb-8">
-        <div className="flex items-center gap-2 text-purple-600 mb-2 font-medium">
-          <Utensils size={18} />
+      <header className="mb-6 md:mb-8">
+        <div className="flex items-center gap-2 text-purple-600 mb-2 font-medium text-sm md:text-base">
+          <Utensils size={16} />
           <span>Fasting Tracker</span>
         </div>
-        <h1 className="text-4xl font-serif text-stone-800 mb-2">Spiritual Discipline</h1>
-        <p className="text-stone-500 max-w-xl">
+        <h1 className="text-2xl md:text-4xl font-serif text-stone-800 mb-2">Spiritual Discipline</h1>
+        <p className="text-stone-500 max-w-xl text-sm md:text-base">
           "When you fast, do not look somber as the hypocrites do... But when you fast, put oil on your head and wash your face." — Matthew 6:16-17
         </p>
       </header>
 
       {/* Active Fast Card */}
       {activeFast && !activeFast.isCompleted && (
-        <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl p-6 text-white mb-6">
-          <div className="flex items-start justify-between mb-4">
+        <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl p-4 md:p-6 text-white mb-4 md:mb-6">
+          <div className="flex items-start justify-between mb-3 md:mb-4">
             <div>
-              <span className="text-purple-200 text-sm font-medium">Active Fast</span>
-              <h2 className="text-2xl font-serif mt-1">{fastTypeInfo[activeFast.type].name}</h2>
+              <span className="text-purple-200 text-xs md:text-sm font-medium">Active Fast</span>
+              <h2 className="text-xl md:text-2xl font-serif mt-1">{fastTypeInfo[activeFast.type].name}</h2>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-serif">{getDaysRemaining(activeFast.endDate)}</div>
-              <span className="text-purple-200 text-sm">days left</span>
+              <div className="text-2xl md:text-3xl font-serif">{getDaysRemaining(activeFast.endDate)}</div>
+              <span className="text-purple-200 text-xs md:text-sm">days left</span>
             </div>
           </div>
           
-          <p className="text-purple-100 mb-4">{activeFast.purpose}</p>
+          <p className="text-purple-100 mb-3 md:mb-4 text-sm md:text-base">{activeFast.purpose}</p>
           
-          <div className="bg-white/10 rounded-lg p-3 mb-4">
+          <div className="bg-white/10 rounded-lg p-2.5 md:p-3 mb-3 md:mb-4">
             <div className="flex items-start gap-2">
-              <BookOpen size={16} className="text-purple-200 mt-0.5 shrink-0" />
+              <BookOpen size={14} className="text-purple-200 mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm text-purple-100 italic">"{activeFast.scripture.text}"</p>
-                <span className="text-xs text-purple-200">{activeFast.scripture.reference}</span>
+                <p className="text-xs md:text-sm text-purple-100 italic">"{activeFast.scripture.text}"</p>
+                <span className="text-[10px] md:text-xs text-purple-200">{activeFast.scripture.reference}</span>
               </div>
             </div>
           </div>
           
-          <div className="mb-2 flex justify-between text-sm">
+          <div className="mb-2 flex justify-between text-xs md:text-sm">
             <span>{formatDate(activeFast.startDate)} - {formatDate(activeFast.endDate)}</span>
             <span>{Math.round(getProgress(activeFast))}% complete</span>
           </div>
-          <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+          <div className="h-1.5 md:h-2 bg-white/20 rounded-full overflow-hidden">
             <div 
               className="h-full bg-white rounded-full transition-all"
               style={{ width: `${getProgress(activeFast)}%` }}
@@ -193,11 +193,11 @@ const FastingTracker: React.FC = () => {
 
       {/* Daily Check-in */}
       {activeFast && !activeFast.isCompleted && (
-        <div className="bg-white rounded-xl border border-stone-200 p-6 mb-6">
-          <h3 className="text-lg font-semibold text-stone-800 mb-4 flex items-center gap-2">
-            <Flame size={20} className="text-orange-500" /> Daily Check-in
+        <div className="bg-white rounded-xl border border-stone-200 p-4 md:p-6 mb-4 md:mb-6">
+          <h3 className="text-base md:text-lg font-semibold text-stone-800 mb-3 md:mb-4 flex items-center gap-2">
+            <Flame size={18} className="text-orange-500" /> Daily Check-in
           </h3>
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-7 gap-1 md:gap-2">
             {activeFast.dailyReflections.map((day, index) => {
               const isToday = day.date === new Date().toISOString().split('T')[0];
               const isPast = new Date(day.date) < new Date(new Date().toISOString().split('T')[0]);

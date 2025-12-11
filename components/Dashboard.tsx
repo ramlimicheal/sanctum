@@ -95,43 +95,43 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
   };
 
   return (
-    <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-8 animate-fade-in pb-24 relative z-10">
+    <div className="p-4 md:p-6 lg:p-10 max-w-6xl mx-auto space-y-6 md:space-y-8 animate-fade-in pb-24 relative z-10">
       {/* Header */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <header className="mb-6 md:mb-8 flex flex-col gap-4 md:gap-6">
         <div>
             <div className={`flex items-center gap-2 ${greeting.color} mb-2 font-medium`}>
             <greeting.icon size={18} />
-            <span>{greeting.text}</span>
+            <span className="text-sm md:text-base">{greeting.text}</span>
             </div>
-            <h1 className="text-4xl font-serif text-stone-800 mb-2">
+            <h1 className="text-2xl md:text-4xl font-serif text-stone-800 mb-2">
             {timeOfDay === 'morning' ? "Begin your day with purpose." : "Rest in His promises."}
             </h1>
-            <p className="text-stone-500 max-w-xl">
+            <p className="text-stone-500 max-w-xl text-sm md:text-base">
             "Draw near to God, and he will draw near to you." — James 4:8
             </p>
         </div>
         
         {/* Streak & Liturgy Clock */}
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           {streak.currentStreak > 0 && (
-            <div className="bg-gradient-to-br from-orange-500 to-amber-600 px-5 py-4 rounded-xl shadow-lg text-white">
-              <div className="flex items-center gap-3">
-                <Flame size={24} className="text-yellow-200" />
+            <div className="bg-gradient-to-br from-orange-500 to-amber-600 px-4 md:px-5 py-3 md:py-4 rounded-xl shadow-lg text-white flex-1 min-w-[140px] sm:flex-none">
+              <div className="flex items-center gap-2 md:gap-3">
+                <Flame size={20} className="text-yellow-200" />
                 <div>
-                  <p className="text-xs font-medium text-orange-100 uppercase tracking-wider">Prayer Streak</p>
-                  <p className="text-2xl font-serif">{streak.currentStreak} <span className="text-sm font-sans">days</span></p>
+                  <p className="text-[10px] md:text-xs font-medium text-orange-100 uppercase tracking-wider">Prayer Streak</p>
+                  <p className="text-xl md:text-2xl font-serif">{streak.currentStreak} <span className="text-xs md:text-sm font-sans">days</span></p>
                 </div>
               </div>
-              <p className="text-xs text-orange-100 mt-1">{getStreakMessage()}</p>
+              <p className="text-[10px] md:text-xs text-orange-100 mt-1 hidden sm:block">{getStreakMessage()}</p>
             </div>
           )}
-          <div className="bg-white/80 backdrop-blur-sm px-6 py-4 rounded-xl border border-stone-200 shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-stone-100 rounded-full text-stone-600">
-                  <Bell size={20} />
+          <div className="bg-white/80 backdrop-blur-sm px-4 md:px-6 py-3 md:py-4 rounded-xl border border-stone-200 shadow-sm flex items-center gap-3 md:gap-4 flex-1 min-w-[140px] sm:flex-none">
+              <div className="p-2 md:p-3 bg-stone-100 rounded-full text-stone-600">
+                  <Bell size={18} />
               </div>
               <div>
-                  <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Next Prayer</p>
-                  <p className="text-lg font-serif text-stone-800">{nextPrayerTime}</p>
+                  <p className="text-[10px] md:text-xs font-bold text-stone-400 uppercase tracking-widest">Next Prayer</p>
+                  <p className="text-sm md:text-lg font-serif text-stone-800">{nextPrayerTime}</p>
               </div>
           </div>
         </div>
@@ -180,51 +180,51 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
       )}
 
       {/* Hero Action - Dynamic based on time */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         <div 
           onClick={() => onChangeView(ViewState.ARCHITECT)}
-          className={`col-span-1 md:col-span-2 rounded-2xl p-8 text-white relative overflow-hidden group cursor-pointer shadow-xl transform transition-all hover:scale-[1.01]
+          className={`col-span-1 lg:col-span-2 rounded-2xl p-6 md:p-8 text-white relative overflow-hidden group cursor-pointer shadow-xl transform transition-all hover:scale-[1.01]
             ${timeOfDay === 'evening' ? 'bg-gradient-to-br from-indigo-900 to-stone-900' : 'bg-gradient-to-br from-stone-800 to-stone-900'}
           `}
         >
-          <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:opacity-100 opacity-60
+          <div className={`absolute top-0 right-0 w-48 md:w-64 h-48 md:h-64 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:opacity-100 opacity-60
             ${timeOfDay === 'evening' ? 'bg-indigo-500/20' : 'bg-gold-500/10'}
           `} />
           
           <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-4 opacity-80">
-               {timeOfDay === 'evening' ? <Moon size={20} /> : <Sun size={20} />}
-               <span className="text-sm font-semibold tracking-wider uppercase">
+            <div className="flex items-center gap-2 mb-3 md:mb-4 opacity-80">
+               {timeOfDay === 'evening' ? <Moon size={18} /> : <Sun size={18} />}
+               <span className="text-xs md:text-sm font-semibold tracking-wider uppercase">
                  {timeOfDay === 'evening' ? 'Evening Examen' : 'Morning Manna'}
                </span>
             </div>
-            <h2 className="text-3xl font-serif mb-4 text-stone-100">
+            <h2 className="text-2xl md:text-3xl font-serif mb-3 md:mb-4 text-stone-100">
               {timeOfDay === 'evening' ? 'Reflect on the day.' : 'Architect your prayer.'}
             </h2>
-            <p className="text-stone-300 mb-8 max-w-md">
+            <p className="text-stone-300 mb-6 md:mb-8 max-w-md text-sm md:text-base">
               {timeOfDay === 'evening' 
                 ? "Review the moments of grace today. Give thanks for the joys and surrender the worries."
                 : "Enter a guided session using the A.C.T.S. model. Let wisdom guide your words."
               }
             </p>
-            <button className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors
+            <button className={`flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 rounded-lg font-semibold transition-colors text-sm md:text-base
               ${timeOfDay === 'evening' ? 'bg-indigo-500 hover:bg-indigo-400 text-white' : 'bg-gold-600 hover:bg-gold-500 text-stone-900'}
             `}>
-              Start Session <ArrowRight size={18} />
+              Start Session <ArrowRight size={16} />
             </button>
           </div>
         </div>
 
         {/* Daily Verse Card */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-stone-200 shadow-sm flex flex-col justify-center relative">
-          <Quote className="absolute top-6 left-6 text-stone-100 w-16 h-16 transform -scale-x-100" />
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-stone-200 shadow-sm flex flex-col justify-center relative">
+          <Quote className="absolute top-4 md:top-6 left-4 md:left-6 text-stone-100 w-12 md:w-16 h-12 md:h-16 transform -scale-x-100" />
           <div className="relative z-10 text-center">
-            <p className="text-lg font-serif text-stone-800 leading-relaxed mb-4">
+            <p className="text-base md:text-lg font-serif text-stone-800 leading-relaxed mb-3 md:mb-4">
               "{dailyVerse.text}"
             </p>
-            <span className="text-sm font-medium text-gold-600 tracking-widest uppercase">{dailyVerse.reference}</span>
+            <span className="text-xs md:text-sm font-medium text-gold-600 tracking-widest uppercase">{dailyVerse.reference}</span>
           </div>
-          <div className="mt-6 pt-6 border-t border-stone-100 flex justify-center gap-4">
+          <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-stone-100 flex justify-center gap-4">
             <button 
               onClick={refreshVerse}
               className="text-stone-400 text-xs flex items-center gap-1 hover:text-stone-600 transition-colors"
@@ -239,27 +239,27 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
       </div>
 
       {/* Analytics & Journey & Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Chart */}
-        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-stone-200 shadow-sm md:col-span-2">
-          <div className="flex justify-between items-end mb-6">
+        <div className="bg-white/80 backdrop-blur-sm p-4 md:p-6 rounded-2xl border border-stone-200 shadow-sm lg:col-span-2">
+          <div className="flex justify-between items-end mb-4 md:mb-6">
             <div>
-              <h3 className="text-lg font-medium text-stone-800">Spiritual Rhythms</h3>
-              <p className="text-sm text-stone-400">Prayer consistency</p>
+              <h3 className="text-base md:text-lg font-medium text-stone-800">Spiritual Rhythms</h3>
+              <p className="text-xs md:text-sm text-stone-400">Prayer consistency</p>
             </div>
             <div className="flex items-center gap-2">
-                <Clock size={16} className="text-gold-600" />
-                <span className="text-2xl font-serif text-stone-800">{totalHours}<span className="text-sm text-stone-400 font-sans ml-1">hrs</span></span>
+                <Clock size={14} className="text-gold-600" />
+                <span className="text-xl md:text-2xl font-serif text-stone-800">{totalHours}<span className="text-xs md:text-sm text-stone-400 font-sans ml-1">hrs</span></span>
             </div>
           </div>
-          <div className="h-48 w-full">
+          <div className="h-36 md:h-48 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weeklyData}>
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{fill: '#a8a29e', fontSize: 12}} 
+                  tick={{fill: '#a8a29e', fontSize: 10}} 
                   dy={10}
                 />
                 <Tooltip 
@@ -277,20 +277,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
         </div>
 
         {/* Spiritual Timeline / Journey */}
-        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-stone-200 shadow-sm md:col-span-1 flex flex-col">
-            <h3 className="text-lg font-medium text-stone-800 mb-4">Your Journey</h3>
-            <div className="flex-1 space-y-4">
+        <div className="bg-white/80 backdrop-blur-sm p-4 md:p-6 rounded-2xl border border-stone-200 shadow-sm lg:col-span-1 flex flex-col">
+            <h3 className="text-base md:text-lg font-medium text-stone-800 mb-3 md:mb-4">Your Journey</h3>
+            <div className="flex-1 space-y-3 md:space-y-4">
                {timeline.map((item, i) => (
                   <div key={item.id} className="flex gap-3 items-start relative">
                      {i !== timeline.length - 1 && (
-                        <div className="absolute left-[15px] top-8 bottom-[-16px] w-0.5 bg-stone-100"></div>
+                        <div className="absolute left-[15px] top-8 bottom-[-12px] md:bottom-[-16px] w-0.5 bg-stone-100"></div>
                      )}
-                     <div className={`w-8 h-8 rounded-full bg-stone-50 border border-stone-200 flex items-center justify-center shrink-0 ${item.color}`}>
-                        <item.icon size={14} />
+                     <div className={`w-7 md:w-8 h-7 md:h-8 rounded-full bg-stone-50 border border-stone-200 flex items-center justify-center shrink-0 ${item.color}`}>
+                        <item.icon size={12} />
                      </div>
                      <div>
-                        <p className="text-sm font-medium text-stone-800">{item.title}</p>
-                        <p className="text-xs text-stone-400">{item.time}</p>
+                        <p className="text-xs md:text-sm font-medium text-stone-800">{item.title}</p>
+                        <p className="text-[10px] md:text-xs text-stone-400">{item.time}</p>
                      </div>
                   </div>
                ))}
@@ -299,56 +299,56 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
         </div>
 
         {/* Quick Actions Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:col-span-3">
-           <div className="bg-stone-100 p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.DEVOTIONAL)}>
-             <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-3 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors">
-               <BookOpen size={22} />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 lg:col-span-3">
+           <div className="bg-stone-100 p-4 md:p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.DEVOTIONAL)}>
+             <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-2 md:mb-3 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors">
+               <BookOpen size={18} />
              </div>
-             <h4 className="font-semibold text-stone-800 text-sm">Devotionals</h4>
-             <p className="text-stone-500 text-xs mt-1">Reading Plans</p>
+             <h4 className="font-semibold text-stone-800 text-xs md:text-sm">Devotionals</h4>
+             <p className="text-stone-500 text-[10px] md:text-xs mt-1">Reading Plans</p>
            </div>
            
-           <div className="bg-stone-100 p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.COMMUNITY)}>
-             <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-3 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
-               <Users size={22} />
+           <div className="bg-stone-100 p-4 md:p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.COMMUNITY)}>
+             <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-2 md:mb-3 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+               <Users size={18} />
              </div>
-             <h4 className="font-semibold text-stone-800 text-sm">Prayer Wall</h4>
-             <p className="text-stone-500 text-xs mt-1">Community</p>
+             <h4 className="font-semibold text-stone-800 text-xs md:text-sm">Prayer Wall</h4>
+             <p className="text-stone-500 text-[10px] md:text-xs mt-1">Community</p>
            </div>
            
-           <div className="bg-stone-100 p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.TESTIMONY)}>
-             <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-3 group-hover:bg-yellow-100 group-hover:text-yellow-600 transition-colors">
-               <Star size={22} />
+           <div className="bg-stone-100 p-4 md:p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.TESTIMONY)}>
+             <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-2 md:mb-3 group-hover:bg-yellow-100 group-hover:text-yellow-600 transition-colors">
+               <Star size={18} />
              </div>
-             <h4 className="font-semibold text-stone-800 text-sm">Testimonies</h4>
-             <p className="text-stone-500 text-xs mt-1">{testimoniesCount} Recorded</p>
+             <h4 className="font-semibold text-stone-800 text-xs md:text-sm">Testimonies</h4>
+             <p className="text-stone-500 text-[10px] md:text-xs mt-1">{testimoniesCount} Recorded</p>
            </div>
            
-           <div className="bg-stone-100 p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.FASTING)}>
-             <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-3 group-hover:bg-purple-100 group-hover:text-purple-600 transition-colors">
-               <Utensils size={22} />
+           <div className="bg-stone-100 p-4 md:p-5 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.FASTING)}>
+             <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-2 md:mb-3 group-hover:bg-purple-100 group-hover:text-purple-600 transition-colors">
+               <Utensils size={18} />
              </div>
-             <h4 className="font-semibold text-stone-800 text-sm">Fasting</h4>
-             <p className="text-stone-500 text-xs mt-1">{activeFast ? 'Active' : 'Start Fast'}</p>
+             <h4 className="font-semibold text-stone-800 text-xs md:text-sm">Fasting</h4>
+             <p className="text-stone-500 text-[10px] md:text-xs mt-1">{activeFast ? 'Active' : 'Start Fast'}</p>
            </div>
         </div>
 
         {/* Secondary Quick Actions */}
-        <div className="grid grid-cols-2 gap-4 md:col-span-3">
-           <div className="bg-stone-100 p-6 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.INTERCESSION)}>
-             <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-4 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
-               <Users size={24} />
+        <div className="grid grid-cols-2 gap-3 md:gap-4 lg:col-span-3">
+           <div className="bg-stone-100 p-4 md:p-6 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.INTERCESSION)}>
+             <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-3 md:mb-4 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+               <Users size={20} />
              </div>
-             <h4 className="font-semibold text-stone-800">Intercessions</h4>
-             <p className="text-stone-500 text-sm mt-1">{intercessionCount} Active Requests</p>
+             <h4 className="font-semibold text-stone-800 text-sm md:text-base">Intercessions</h4>
+             <p className="text-stone-500 text-xs md:text-sm mt-1">{intercessionCount} Active Requests</p>
            </div>
            
-           <div className="bg-stone-100 p-6 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.LETTERS)}>
-             <div className="w-12 h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-4 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors">
-               <Mail size={24} />
+           <div className="bg-stone-100 p-4 md:p-6 rounded-2xl border border-stone-200 flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white hover:shadow-md transition-all group" onClick={() => onChangeView(ViewState.LETTERS)}>
+             <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center mb-3 md:mb-4 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors">
+               <Mail size={20} />
              </div>
-             <h4 className="font-semibold text-stone-800">Letters to God</h4>
-             <p className="text-stone-500 text-sm mt-1">{letterCount} Written</p>
+             <h4 className="font-semibold text-stone-800 text-sm md:text-base">Letters to God</h4>
+             <p className="text-stone-500 text-xs md:text-sm mt-1">{letterCount} Written</p>
            </div>
         </div>
       </div>

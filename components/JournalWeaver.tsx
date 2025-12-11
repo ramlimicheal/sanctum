@@ -15,7 +15,7 @@ const JournalWeaver: React.FC = () => {
   const [entry, setEntry] = useState('');
   const [isWeaving, setIsWeaving] = useState(false);
   const [result, setResult] = useState<ScriptureWeaveResult | null>(null);
-  const [savedEntries, setSavedEntries] = useLocalStorage<JournalEntry[]>('sanctum_journal_entries', []);
+  const [savedEntries, setSavedEntries] = useLocalStorage<JournalEntry[]>('theolyte_journal_entries', []);
   const [showSaved, setShowSaved] = useState(false);
 
   const handleWeave = async () => {
@@ -54,16 +54,16 @@ const JournalWeaver: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 md:p-10 h-full flex flex-col md:flex-row gap-8 pb-24">
+    <div className="max-w-5xl mx-auto p-4 md:p-6 lg:p-10 h-full flex flex-col lg:flex-row gap-4 md:gap-6 lg:gap-8 pb-24">
       {/* Input Side */}
       <div className="flex-1 flex flex-col">
-        <div className="mb-4 flex justify-between items-start">
+        <div className="mb-3 md:mb-4 flex justify-between items-start">
           <div>
-            <h2 className="text-2xl font-serif text-stone-900 flex items-center gap-2">
-              <Feather className="text-gold-600" />
+            <h2 className="text-xl md:text-2xl font-serif text-stone-900 flex items-center gap-2">
+              <Feather className="text-gold-600" size={20} />
               Scripture Journal
             </h2>
-            <p className="text-stone-500 text-sm mt-1">Pour out your heart. Let the Spirit weave the Word into your words.</p>
+            <p className="text-stone-500 text-xs md:text-sm mt-1">Pour out your heart. Let the Spirit weave the Word into your words.</p>
           </div>
           <button
             onClick={() => setShowSaved(!showSaved)}

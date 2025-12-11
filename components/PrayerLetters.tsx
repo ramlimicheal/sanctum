@@ -125,12 +125,12 @@ const PrayerLetters: React.FC = () => {
   // --- WRITE VIEW ---
   if (view === 'write') {
     return (
-      <div className="max-w-4xl mx-auto p-6 md:p-10 pb-20 h-full flex flex-col">
-        <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => setView('list')} className="p-2 hover:bg-stone-200 rounded-full text-stone-500">
-            <ChevronLeft />
+      <div className="max-w-4xl mx-auto p-4 md:p-6 lg:p-10 pb-20 h-full flex flex-col">
+        <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+          <button onClick={() => setView('list')} className="p-1.5 md:p-2 hover:bg-stone-200 rounded-full text-stone-500">
+            <ChevronLeft size={20} />
           </button>
-          <h2 className="text-2xl font-serif text-stone-800">New Letter to God</h2>
+          <h2 className="text-xl md:text-2xl font-serif text-stone-800">New Letter to God</h2>
         </div>
 
         <div className="flex-1 bg-white rounded-xl shadow-xl border border-stone-200 flex flex-col overflow-hidden relative">

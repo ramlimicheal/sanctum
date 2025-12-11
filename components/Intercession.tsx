@@ -129,15 +129,15 @@ const Intercession: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 md:p-10 pb-24">
-      <div className="flex justify-between items-center mb-8">
+    <div className="max-w-4xl mx-auto p-4 md:p-6 lg:p-10 pb-24">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
         <div>
-          <h2 className="text-3xl font-serif text-stone-800">Intercession Circle</h2>
-          <p className="text-stone-500 mt-1">Bear one another's burdens.</p>
+          <h2 className="text-2xl md:text-3xl font-serif text-stone-800">Intercession Circle</h2>
+          <p className="text-stone-500 mt-1 text-sm md:text-base">Bear one another's burdens.</p>
         </div>
         <button 
           onClick={() => setIsAdding(true)}
-          className="bg-stone-900 text-white p-3 rounded-full hover:bg-gold-600 transition-colors shadow-lg"
+          className="bg-stone-900 text-white p-2.5 md:p-3 rounded-full hover:bg-gold-600 transition-colors shadow-lg"
         >
           <Plus size={24} />
         </button>
