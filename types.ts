@@ -85,6 +85,9 @@ export interface PeaceResponse {
 // New Types for World-Class Features
 
 export enum ViewState {
+  LANDING = 'LANDING',
+  SIGNIN = 'SIGNIN',
+  SIGNUP = 'SIGNUP',
   DASHBOARD = 'DASHBOARD',
   ARCHITECT = 'ARCHITECT',
   LETTERS = 'LETTERS',

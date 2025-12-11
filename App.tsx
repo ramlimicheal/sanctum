@@ -19,13 +19,25 @@ import CommunityPrayer from './components/CommunityPrayer';
 import TestimonyJournal from './components/TestimonyJournal';
 import FastingTracker from './components/FastingTracker';
 import BibleReader from './components/BibleReader';
+import LandingPage from './components/LandingPage';
+import SignIn from './components/SignIn';
+import SignUp from './components/SignUp';
 import { ViewState } from './types';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<ViewState>(ViewState.DASHBOARD);
+  const [currentView, setCurrentView] = useState<ViewState>(ViewState.LANDING);
+
+  // Check if we're on an auth/landing page (no sidebar needed)
+  const isAuthPage = [ViewState.LANDING, ViewState.SIGNIN, ViewState.SIGNUP].includes(currentView);
 
   const renderView = () => {
     switch (currentView) {
+      case ViewState.LANDING:
+        return <LandingPage onChangeView={setCurrentView} />;
+      case ViewState.SIGNIN:
+        return <SignIn onChangeView={setCurrentView} />;
+      case ViewState.SIGNUP:
+        return <SignUp onChangeView={setCurrentView} />;
       case ViewState.DASHBOARD:
         return <Dashboard onChangeView={setCurrentView} />;
       case ViewState.ARCHITECT:
@@ -61,9 +73,18 @@ const App: React.FC = () => {
       case ViewState.BIBLE:
         return <BibleReader />;
       default:
-        return <Dashboard onChangeView={setCurrentView} />;
+        return <LandingPage onChangeView={setCurrentView} />;
     }
   };
+
+  // For auth pages, render without sidebar
+  if (isAuthPage) {
+    return (
+      <div className="h-screen w-full overflow-auto">
+        {renderView()}
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full bg-stone-50 overflow-hidden font-sans text-stone-800">
