@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sanctum AI</title>
+    <title>Theolyte</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -20,6 +20,8 @@
               'slide-down': 'slideDown 0.4s ease-out forwards',
               'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
               'float': 'float 20s infinite linear',
+              'glow': 'glow 4s ease-in-out infinite',
+              'divine-light': 'divineLight 6s ease-in-out infinite',
             },
             keyframes: {
               fadeIn: {
@@ -39,7 +41,18 @@
                 '33%': { transform: 'translateY(-20px) translateX(10px) rotate(10deg)' },
                 '66%': { transform: 'translateY(-10px) translateX(-5px) rotate(-5deg)' },
                 '100%': { transform: 'translateY(0) translateX(0) rotate(0deg)' },
+              },
+              glow: {
+                '0%, 100%': { opacity: '0.5', transform: 'scale(1)' },
+                '50%': { opacity: '0.8', transform: 'scale(1.05)' },
+              },
+              divineLight: {
+                '0%, 100%': { opacity: '0.3', transform: 'translateY(0)' },
+                '50%': { opacity: '0.6', transform: 'translateY(-10px)' },
               }
+            },
+            backgroundImage: {
+              'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
             },
             colors: {
               stone: {

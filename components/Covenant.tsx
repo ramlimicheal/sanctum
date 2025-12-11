@@ -51,43 +51,43 @@ const Covenant: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 md:p-10 pb-24 h-full animate-fade-in flex flex-col">
+    <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-10 pb-24 h-full animate-fade-in flex flex-col">
       {/* Header */}
-      <div className="mb-8 flex flex-col md:flex-row justify-between items-end gap-6">
+      <div className="mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6">
         <div>
-          <h2 className="text-3xl font-serif text-stone-900 mb-2 flex items-center gap-3">
-            <HeartHandshake className="text-gold-600" /> The Covenant
+          <h2 className="text-2xl md:text-3xl font-serif text-stone-900 mb-2 flex items-center gap-3">
+            <HeartHandshake className="text-gold-600" size={24} /> The Covenant
           </h2>
-          <p className="text-stone-500 max-w-xl">
+          <p className="text-stone-500 max-w-xl text-sm md:text-base">
             "Though one may be overpowered, two can defend themselves. A cord of three strands is not quickly broken." — Ecclesiastes 4:12
           </p>
         </div>
         
-        <div className="flex bg-stone-200 rounded-lg p-1">
+        <div className="flex bg-stone-200 rounded-lg p-1 w-full md:w-auto">
           <button 
             onClick={() => setActiveTab('dashboard')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'dashboard' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500 hover:text-stone-700'}`}
+            className={`flex-1 md:flex-none px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-all ${activeTab === 'dashboard' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500 hover:text-stone-700'}`}
           >
             Dashboard
           </button>
           <button 
             onClick={() => setActiveTab('peacemaker')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'peacemaker' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500 hover:text-stone-700'}`}
+            className={`flex-1 md:flex-none px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-all flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'peacemaker' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500 hover:text-stone-700'}`}
           >
-            <AlertTriangle size={14} /> The Peacemaker
+            <AlertTriangle size={12} /> <span className="hidden sm:inline">The</span> Peacemaker
           </button>
         </div>
       </div>
 
       {activeTab === 'dashboard' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
            {/* Weekly Check-in Card */}
-           <div className="bg-stone-900 text-stone-300 p-8 rounded-2xl shadow-xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <MessageCircle size={100} />
+           <div className="bg-stone-900 text-stone-300 p-5 md:p-8 rounded-2xl shadow-xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 md:p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                <MessageCircle size={80} />
               </div>
-              <h3 className="text-xl font-serif text-gold-500 mb-2">Weekly Altar</h3>
-              <p className="text-sm text-stone-400 mb-6">Structured time to connect, pray, and align.</p>
+              <h3 className="text-lg md:text-xl font-serif text-gold-500 mb-2">Weekly Altar</h3>
+              <p className="text-xs md:text-sm text-stone-400 mb-4 md:mb-6">Structured time to connect, pray, and align.</p>
               
               <div className="space-y-4 mb-8">
                 <div className="flex items-center gap-3 bg-stone-800 p-3 rounded-lg border border-stone-700">

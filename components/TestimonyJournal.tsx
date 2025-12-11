@@ -95,45 +95,45 @@ const TestimonyJournal: React.FC = () => {
   };
 
   return (
-    <div className="p-6 md:p-10 max-w-5xl mx-auto space-y-6 animate-fade-in pb-24 relative z-10">
+    <div className="p-4 md:p-6 lg:p-10 max-w-5xl mx-auto space-y-4 md:space-y-6 animate-fade-in pb-24 relative z-10">
       {/* Header */}
-      <header className="mb-8">
-        <div className="flex items-center gap-2 text-amber-600 mb-2 font-medium">
-          <Star size={18} />
+      <header className="mb-6 md:mb-8">
+        <div className="flex items-center gap-2 text-amber-600 mb-2 font-medium text-sm md:text-base">
+          <Star size={16} />
           <span>Testimony Journal</span>
         </div>
-        <h1 className="text-4xl font-serif text-stone-800 mb-2">Remember His Faithfulness</h1>
-        <p className="text-stone-500 max-w-xl">
+        <h1 className="text-2xl md:text-4xl font-serif text-stone-800 mb-2">Remember His Faithfulness</h1>
+        <p className="text-stone-500 max-w-xl text-sm md:text-base">
           "Come and see what God has done, his awesome deeds for mankind!" — Psalm 66:5
         </p>
       </header>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-stone-200 p-4 text-center">
-          <p className="text-2xl font-serif text-stone-800">{testimonies.length}</p>
-          <p className="text-xs text-stone-500">Total Testimonies</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">
+        <div className="bg-white rounded-xl border border-stone-200 p-3 md:p-4 text-center">
+          <p className="text-xl md:text-2xl font-serif text-stone-800">{testimonies.length}</p>
+          <p className="text-[10px] md:text-xs text-stone-500">Total Testimonies</p>
         </div>
-        <div className="bg-white rounded-xl border border-stone-200 p-4 text-center">
-          <p className="text-2xl font-serif text-amber-600">{testimonies.filter(t => t.category === 'answered_prayer').length}</p>
-          <p className="text-xs text-stone-500">Answered Prayers</p>
+        <div className="bg-white rounded-xl border border-stone-200 p-3 md:p-4 text-center">
+          <p className="text-xl md:text-2xl font-serif text-amber-600">{testimonies.filter(t => t.category === 'answered_prayer').length}</p>
+          <p className="text-[10px] md:text-xs text-stone-500">Answered Prayers</p>
         </div>
-        <div className="bg-white rounded-xl border border-stone-200 p-4 text-center">
-          <p className="text-2xl font-serif text-rose-600">{testimonies.filter(t => t.category === 'healing').length}</p>
-          <p className="text-xs text-stone-500">Healings</p>
+        <div className="bg-white rounded-xl border border-stone-200 p-3 md:p-4 text-center">
+          <p className="text-xl md:text-2xl font-serif text-rose-600">{testimonies.filter(t => t.category === 'healing').length}</p>
+          <p className="text-[10px] md:text-xs text-stone-500">Healings</p>
         </div>
-        <div className="bg-white rounded-xl border border-stone-200 p-4 text-center">
-          <p className="text-2xl font-serif text-indigo-600">{testimonies.filter(t => t.category === 'miracle').length}</p>
-          <p className="text-xs text-stone-500">Miracles</p>
+        <div className="bg-white rounded-xl border border-stone-200 p-3 md:p-4 text-center">
+          <p className="text-xl md:text-2xl font-serif text-indigo-600">{testimonies.filter(t => t.category === 'miracle').length}</p>
+          <p className="text-[10px] md:text-xs text-stone-500">Miracles</p>
         </div>
       </div>
 
       {/* Filter & Add */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4 mb-4 md:mb-6">
+        <div className="flex flex-wrap gap-1.5 md:gap-2 overflow-x-auto pb-2 sm:pb-0">
           <button 
             onClick={() => setFilter('all')}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
               filter === 'all' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
             }`}
           >
@@ -143,7 +143,7 @@ const TestimonyJournal: React.FC = () => {
             <button 
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
                 filter === cat ? categoryColors[cat] : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
               }`}
             >
@@ -154,23 +154,23 @@ const TestimonyJournal: React.FC = () => {
         
         <button 
           onClick={() => setShowAddModal(true)}
-          className="bg-amber-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-amber-700 transition-colors flex items-center gap-2"
+          className="bg-amber-600 text-white px-3 md:px-4 py-2 rounded-lg font-medium hover:bg-amber-700 transition-colors flex items-center justify-center gap-2 text-sm md:text-base w-full sm:w-auto"
         >
-          <Plus size={18} /> Record Testimony
+          <Plus size={16} /> Record Testimony
         </button>
       </div>
 
       {/* Testimonies Grid */}
       {filteredTestimonies.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {filteredTestimonies.map(testimony => (
             <div 
               key={testimony.id}
               onClick={() => setSelectedTestimony(testimony)}
-              className="bg-white rounded-xl border border-stone-200 p-5 cursor-pointer hover:shadow-lg transition-all group"
+              className="bg-white rounded-xl border border-stone-200 p-4 md:p-5 cursor-pointer hover:shadow-lg transition-all group"
             >
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${categoryColors[testimony.category]}`}>
+              <div className="flex items-start justify-between gap-3 mb-2 md:mb-3">
+                <span className={`px-2 py-0.5 rounded-full text-[10px] md:text-xs font-medium ${categoryColors[testimony.category]}`}>
                   {categoryLabels[testimony.category]}
                 </span>
                 <span className="text-xs text-stone-400 flex items-center gap-1">

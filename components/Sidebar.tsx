@@ -32,12 +32,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView }) => {
   ];
 
   return (
-    <div className="h-full w-20 md:w-64 bg-stone-900 text-stone-300 flex flex-col border-r border-stone-800 shadow-2xl z-20">
-      <div className="p-6 flex items-center justify-center md:justify-start gap-3 border-b border-stone-800">
+    <div className="h-full w-64 bg-stone-900 text-stone-300 flex flex-col border-r border-stone-800 shadow-2xl z-20">
+      <div className="p-6 flex items-center gap-3 border-b border-stone-800">
         <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gold-600 to-amber-300 flex items-center justify-center text-stone-900 font-serif font-bold text-lg">
           S
         </div>
-        <span className="hidden md:block font-serif text-xl text-stone-100 tracking-wide">Sanctum</span>
+        <span className="font-serif text-xl text-stone-100 tracking-wide">Theolyte</span>
       </div>
 
       {/* Prayer Streak Badge */}
@@ -45,11 +45,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView }) => {
         <div className="mx-4 mt-4 p-3 bg-gradient-to-r from-amber-900/50 to-orange-900/50 rounded-xl border border-amber-700/30">
           <div className="flex items-center gap-2">
             <Flame size={18} className="text-orange-400" />
-            <div className="hidden md:block">
+            <div>
               <p className="text-xs text-amber-200/70">Prayer Streak</p>
               <p className="text-lg font-serif text-amber-300">{streak.currentStreak} days</p>
             </div>
-            <span className="md:hidden text-amber-300 font-bold">{streak.currentStreak}</span>
           </div>
         </div>
       )}
@@ -68,13 +67,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView }) => {
                 }`}
             >
               <item.icon className={`w-5 h-5 ${isActive ? 'text-gold-500' : 'text-stone-400 group-hover:text-stone-200'}`} />
-              <span className="hidden md:block font-medium text-sm">{item.label}</span>
+              <span className="font-medium text-sm">{item.label}</span>
               {item.isNew && (
-                <span className="hidden md:inline-block px-1.5 py-0.5 bg-amber-500 text-stone-900 text-[10px] font-bold rounded ml-auto">
+                <span className="px-1.5 py-0.5 bg-amber-500 text-stone-900 text-[10px] font-bold rounded ml-auto">
                   NEW
                 </span>
               )}
-              {isActive && <div className="hidden md:block ml-auto w-1.5 h-1.5 rounded-full bg-gold-500 shadow-[0_0_8px_rgba(212,175,55,0.8)]" />}
+              {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-gold-500 shadow-[0_0_8px_rgba(212,175,55,0.8)]" />}
             </button>
           );
         })}
@@ -90,11 +89,11 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView }) => {
           }`}
         >
           <Settings size={18} />
-          <span className="hidden md:block text-sm">Settings</span>
+          <span className="text-sm">Settings</span>
         </button>
         <button className="flex items-center gap-3 text-stone-500 hover:text-stone-300 transition-colors w-full px-4 py-2">
           <LogOut size={18} />
-          <span className="hidden md:block text-sm">Sign Out</span>
+          <span className="text-sm">Sign Out</span>
         </button>
       </div>
     </div>

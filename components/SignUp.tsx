@@ -150,7 +150,7 @@ const SignUp: React.FC<SignUpProps> = ({ onChangeView }) => {
               <div className="w-12 h-12 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center shadow-lg shadow-gold-500/25">
                 <Cross className="text-white" size={24} />
               </div>
-              <span className="text-2xl font-serif font-semibold text-stone-800">Sanctum AI</span>
+              <span className="text-2xl font-serif font-semibold text-stone-800">Theolyte</span>
             </button>
           </div>
           

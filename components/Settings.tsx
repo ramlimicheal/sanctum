@@ -29,7 +29,7 @@ const Settings: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `sanctum-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `theolyte-backup-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -57,12 +57,12 @@ const Settings: React.FC = () => {
   const { nextMilestone, progress } = getMilestoneProgress();
 
   return (
-    <div className="max-w-3xl mx-auto p-6 md:p-10 pb-24 animate-fade-in">
-      <div className="mb-10">
-        <h2 className="text-3xl font-serif text-stone-900 mb-2 flex items-center gap-3">
-          <SettingsIcon className="text-gold-600" /> Settings
+    <div className="max-w-3xl mx-auto p-4 md:p-6 lg:p-10 pb-24 animate-fade-in">
+      <div className="mb-6 md:mb-10">
+        <h2 className="text-2xl md:text-3xl font-serif text-stone-900 mb-2 flex items-center gap-3">
+          <SettingsIcon className="text-gold-600" size={24} /> Settings
         </h2>
-        <p className="text-stone-500">
+        <p className="text-stone-500 text-sm md:text-base">
           Customize your spiritual journey experience.
         </p>
       </div>

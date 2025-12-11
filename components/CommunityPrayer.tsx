@@ -153,41 +153,41 @@ const CommunityPrayer: React.FC = () => {
   };
 
   return (
-    <div className="p-6 md:p-10 max-w-4xl mx-auto space-y-6 animate-fade-in pb-24 relative z-10">
+    <div className="p-4 md:p-6 lg:p-10 max-w-4xl mx-auto space-y-4 md:space-y-6 animate-fade-in pb-24 relative z-10">
       {/* Header */}
-      <header className="mb-8">
-        <div className="flex items-center gap-2 text-indigo-600 mb-2 font-medium">
-          <Users size={18} />
+      <header className="mb-6 md:mb-8">
+        <div className="flex items-center gap-2 text-indigo-600 mb-2 font-medium text-sm md:text-base">
+          <Users size={16} />
           <span>Community Prayer Wall</span>
         </div>
-        <h1 className="text-4xl font-serif text-stone-800 mb-2">Pray Together</h1>
-        <p className="text-stone-500 max-w-xl">
+        <h1 className="text-2xl md:text-4xl font-serif text-stone-800 mb-2">Pray Together</h1>
+        <p className="text-stone-500 max-w-xl text-sm md:text-base">
           "For where two or three gather in my name, there am I with them." — Matthew 18:20
         </p>
       </header>
 
       {/* Stats Bar */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-stone-200 p-4 text-center">
-          <p className="text-2xl font-serif text-stone-800">{prayers.length}</p>
-          <p className="text-xs text-stone-500">Prayer Requests</p>
+      <div className="grid grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-6">
+        <div className="bg-white rounded-xl border border-stone-200 p-3 md:p-4 text-center">
+          <p className="text-xl md:text-2xl font-serif text-stone-800">{prayers.length}</p>
+          <p className="text-[10px] md:text-xs text-stone-500">Prayer Requests</p>
         </div>
-        <div className="bg-white rounded-xl border border-stone-200 p-4 text-center">
-          <p className="text-2xl font-serif text-indigo-600">{prayers.reduce((sum, p) => sum + p.prayerCount, 0)}</p>
-          <p className="text-xs text-stone-500">Prayers Lifted</p>
+        <div className="bg-white rounded-xl border border-stone-200 p-3 md:p-4 text-center">
+          <p className="text-xl md:text-2xl font-serif text-indigo-600">{prayers.reduce((sum, p) => sum + p.prayerCount, 0)}</p>
+          <p className="text-[10px] md:text-xs text-stone-500">Prayers Lifted</p>
         </div>
-        <div className="bg-white rounded-xl border border-stone-200 p-4 text-center">
-          <p className="text-2xl font-serif text-emerald-600">{prayers.filter(p => p.isAnswered).length}</p>
-          <p className="text-xs text-stone-500">Answered</p>
+        <div className="bg-white rounded-xl border border-stone-200 p-3 md:p-4 text-center">
+          <p className="text-xl md:text-2xl font-serif text-emerald-600">{prayers.filter(p => p.isAnswered).length}</p>
+          <p className="text-[10px] md:text-xs text-stone-500">Answered</p>
         </div>
       </div>
 
       {/* Filter & Add */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4 mb-4 md:mb-6">
+        <div className="flex flex-wrap gap-1.5 md:gap-2 overflow-x-auto pb-2 sm:pb-0">
           <button 
             onClick={() => setFilter('all')}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
               filter === 'all' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
             }`}
           >
@@ -195,7 +195,7 @@ const CommunityPrayer: React.FC = () => {
           </button>
           <button 
             onClick={() => setFilter('answered')}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
               filter === 'answered' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
             }`}
           >
@@ -205,20 +205,20 @@ const CommunityPrayer: React.FC = () => {
             <button 
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`px-2.5 md:px-3 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
                 filter === cat ? categoryColors[cat] : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
               }`}
             >
-              {categoryIcons[cat]} {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              {categoryIcons[cat]} <span className="hidden sm:inline">{cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
             </button>
           ))}
         </div>
         
         <button 
           onClick={() => setShowAddModal(true)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2"
+          className="bg-indigo-600 text-white px-3 md:px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 text-sm md:text-base w-full sm:w-auto"
         >
-          <Plus size={18} /> Share Request
+          <Plus size={16} /> Share Request
         </button>
       </div>
 

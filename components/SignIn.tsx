@@ -51,25 +51,25 @@ const SignIn: React.FC<SignInProps> = ({ onChangeView }) => {
       <ParticleBackground />
       
       {/* Left Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 relative z-10">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative z-10">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-6 md:mb-8">
             <button 
               onClick={() => onChangeView(ViewState.LANDING)}
               className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center shadow-lg shadow-gold-500/25">
-                <Cross className="text-white" size={24} />
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center shadow-lg shadow-gold-500/25">
+                <Cross className="text-white" size={20} />
               </div>
-              <span className="text-2xl font-serif font-semibold text-stone-800">Sanctum AI</span>
+              <span className="text-xl md:text-2xl font-serif font-semibold text-stone-800">Theolyte</span>
             </button>
           </div>
           
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-serif text-stone-900 mb-2">Welcome Back</h1>
-            <p className="text-stone-600">
+          <div className="mb-6 md:mb-8">
+            <h1 className="text-2xl md:text-3xl font-serif text-stone-900 mb-2">Welcome Back</h1>
+            <p className="text-stone-600 text-sm md:text-base">
               Continue your spiritual journey. Sign in to access your sanctuary.
             </p>
           </div>
@@ -79,17 +79,17 @@ const SignIn: React.FC<SignInProps> = ({ onChangeView }) => {
             <button 
               onClick={() => handleSocialLogin('google')}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 bg-white border border-stone-200 rounded-xl px-4 py-3 font-medium text-stone-700 hover:bg-stone-50 hover:border-stone-300 transition-all disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-3 bg-white border border-stone-200 rounded-xl px-4 py-2.5 md:py-3 font-medium text-stone-700 hover:bg-stone-50 hover:border-stone-300 transition-all disabled:opacity-50 text-sm md:text-base"
             >
-              <Chrome size={20} />
+              <Chrome size={18} />
               Continue with Google
             </button>
             <button 
               onClick={() => handleSocialLogin('apple')}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 bg-stone-900 rounded-xl px-4 py-3 font-medium text-white hover:bg-stone-800 transition-all disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-3 bg-stone-900 rounded-xl px-4 py-2.5 md:py-3 font-medium text-white hover:bg-stone-800 transition-all disabled:opacity-50 text-sm md:text-base"
             >
-              <Apple size={20} />
+              <Apple size={18} />
               Continue with Apple
             </button>
           </div>
@@ -97,7 +97,7 @@ const SignIn: React.FC<SignInProps> = ({ onChangeView }) => {
           {/* Divider */}
           <div className="flex items-center gap-4 mb-6">
             <div className="flex-1 h-px bg-stone-200" />
-            <span className="text-sm text-stone-400">or sign in with email</span>
+            <span className="text-xs md:text-sm text-stone-400">or sign in with email</span>
             <div className="flex-1 h-px bg-stone-200" />
           </div>
           
@@ -228,7 +228,7 @@ const SignIn: React.FC<SignInProps> = ({ onChangeView }) => {
               </div>
             </div>
             <p className="text-stone-300 text-left italic">
-              "Sanctum AI has become my daily companion for prayer and devotion. 
+              "Theolyte has become my daily companion for prayer and devotion. 
               The structured approach has transformed my spiritual life."
             </p>
           </div>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import { 
   Sparkles, 
   BookOpen, 
@@ -11,7 +12,6 @@ import {
   Play,
   Quote,
   ChevronDown,
-  Zap,
   Shield,
   Clock,
   Target,
@@ -19,7 +19,6 @@ import {
   TrendingUp,
   Award,
   Globe,
-  Smartphone,
   Sun,
   Cross,
   Compass,
@@ -34,7 +33,9 @@ import {
   ArrowDown,
   Menu,
   X,
-  Mountain
+  Mountain,
+  Mail,
+  Utensils
 } from 'lucide-react';
 import { ViewState } from '@/types';
 import ParticleBackground from './ParticleBackground';
@@ -43,11 +44,47 @@ interface LandingPageProps {
   onChangeView: (view: ViewState) => void;
 }
 
+// Animation variants
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+};
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.5 } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+  }
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" } }
+};
+
 const LandingPage: React.FC<LandingPageProps> = ({ onChangeView }) => {
   const [scrolled, setScrolled] = useState(false);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const heroRef = useRef<HTMLDivElement>(null);
+  const dashboardRef = useRef<HTMLDivElement>(null);
+  const isDashboardInView = useInView(dashboardRef, { once: true, margin: "-100px" });
+  
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  
+  const dashboardY = useTransform(scrollYProgress, [0, 1], [0, -50]);
+  const dashboardOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,151 +101,72 @@ const LandingPage: React.FC<LandingPageProps> = ({ onChangeView }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Core Features - What the app does
   const coreFeatures = [
     {
       icon: BookOpen,
       title: 'Bible Reader',
-      description: 'Immerse yourself in Scripture with multiple translations, bookmarks, highlighting, and personalized daily reading plans that adapt to your pace.',
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
-      details: ['Multiple translations (KJV, NIV, ESV, NLT)', 'Verse highlighting & notes', 'Audio Bible option', 'Cross-references']
+      description: 'Multiple translations, bookmarks, highlighting, and personalized daily reading plans.',
+      details: ['Multiple translations', 'Verse highlighting', 'Audio Bible', 'Cross-references']
     },
     {
       icon: Heart,
       title: 'Prayer Architect',
-      description: 'Build structured, meaningful prayers using the ACTS method (Adoration, Confession, Thanksgiving, Supplication) with AI-powered scripture suggestions.',
-      color: 'text-rose-600',
-      bg: 'bg-rose-50',
-      details: ['ACTS prayer framework', 'AI scripture integration', 'Prayer templates', 'Voice-to-text prayer']
+      description: 'Build structured prayers using the ACTS method with AI-powered scripture suggestions.',
+      details: ['ACTS framework', 'AI scripture integration', 'Prayer templates', 'Voice-to-text']
     },
     {
       icon: Flame,
       title: 'Fasting Tracker',
-      description: 'Track your fasting journey with guided plans for Daniel Fast, water fast, and intermittent fasting. Get health tips and spiritual insights.',
-      color: 'text-amber-600',
-      bg: 'bg-amber-50',
-      details: ['Multiple fasting types', 'Health monitoring', 'Spiritual reflections', 'Community fasting events']
+      description: 'Track your fasting journey with guided plans and spiritual reflections.',
+      details: ['Multiple fasting types', 'Health monitoring', 'Spiritual reflections', 'Community events']
     },
     {
       icon: Users,
       title: 'Community Prayer',
-      description: 'Join a global community of believers lifting prayers together. Share requests anonymously, pray for others, and celebrate answered prayers.',
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50',
-      details: ['Anonymous prayer requests', 'Prayer chains', 'Global prayer wall', 'Answered prayer celebrations']
+      description: 'Join believers worldwide. Share requests and celebrate answered prayers.',
+      details: ['Anonymous requests', 'Prayer chains', 'Global prayer wall', 'Celebrations']
     },
     {
       icon: Star,
       title: 'Testimony Journal',
-      description: 'Document God\'s faithfulness in your life. Record answered prayers, spiritual breakthroughs, and moments of divine intervention.',
-      color: 'text-yellow-600',
-      bg: 'bg-yellow-50',
-      details: ['Timeline view', 'Photo attachments', 'Share with community', 'Anniversary reminders']
+      description: 'Document God\'s faithfulness. Record answered prayers and breakthroughs.',
+      details: ['Timeline view', 'Photo attachments', 'Share with community', 'Reminders']
     },
     {
       icon: Target,
       title: 'Vision Wall',
-      description: 'Create a visual board of your God-given dreams and spiritual goals. Track progress and stay aligned with your divine purpose.',
-      color: 'text-purple-600',
-      bg: 'bg-purple-50',
-      details: ['Visual goal boards', 'Scripture affirmations', 'Progress tracking', 'Goal milestones']
-    },
-    {
-      icon: Sunrise,
-      title: 'Daily Devotionals',
-      description: 'Start each day with AI-curated devotionals personalized to your spiritual journey, struggles, and growth areas.',
-      color: 'text-orange-600',
-      bg: 'bg-orange-50',
-      details: ['Personalized content', 'Multiple devotional plans', 'Reflection prompts', 'Daily verse delivery']
-    },
-    {
-      icon: Feather,
-      title: 'Journal Weaver',
-      description: 'A sacred space for spiritual journaling. Write prayers, reflections, and insights with guided prompts and scripture integration.',
-      color: 'text-teal-600',
-      bg: 'bg-teal-50',
-      details: ['Guided prompts', 'Mood tracking', 'Scripture linking', 'Private & secure']
-    },
-    {
-      icon: Compass,
-      title: 'Purpose Aligner',
-      description: 'Discover and align with your God-given purpose through guided exercises, spiritual gifts assessments, and calling exploration.',
-      color: 'text-cyan-600',
-      bg: 'bg-cyan-50',
-      details: ['Spiritual gifts test', 'Calling discovery', 'Life purpose mapping', 'Mentor matching']
+      description: 'Visualize your God-given dreams and spiritual goals.',
+      details: ['Visual goal boards', 'Scripture affirmations', 'Progress tracking', 'Milestones']
     }
   ];
 
-  // Problems the app solves
   const problemsSolved = [
-    {
-      problem: "Inconsistent Prayer Life",
-      solution: "Structured prayer tools with reminders and streak tracking keep you accountable",
-      icon: Clock
-    },
-    {
-      problem: "Feeling Spiritually Isolated",
-      solution: "Connect with a global community of believers who pray for and with you",
-      icon: Users
-    },
-    {
-      problem: "Difficulty Understanding Scripture",
-      solution: "AI-powered insights and cross-references make the Bible accessible",
-      icon: Lightbulb
-    },
-    {
-      problem: "Forgetting God's Faithfulness",
-      solution: "Testimony journal helps you remember and celebrate answered prayers",
-      icon: BookMarked
-    },
-    {
-      problem: "Lack of Spiritual Direction",
-      solution: "Purpose alignment tools and devotionals guide your spiritual growth",
-      icon: Compass
-    },
-    {
-      problem: "Struggling with Spiritual Disciplines",
-      solution: "Gamified tracking and community support make disciplines enjoyable",
-      icon: Mountain
-    }
+    { problem: "Inconsistent Prayer Life", solution: "Structured tools with reminders and streak tracking", icon: Clock },
+    { problem: "Feeling Spiritually Isolated", solution: "Connect with a global community of believers", icon: Users },
+    { problem: "Difficulty Understanding Scripture", solution: "AI-powered insights and cross-references", icon: Lightbulb },
+    { problem: "Forgetting God's Faithfulness", solution: "Testimony journal to remember answered prayers", icon: BookMarked },
+    { problem: "Lack of Spiritual Direction", solution: "Purpose alignment tools and devotionals", icon: Compass },
+    { problem: "Struggling with Disciplines", solution: "Gamified tracking and community support", icon: Mountain }
   ];
 
   const testimonials = [
     {
-      quote: "Sanctum AI has completely transformed my prayer life. The ACTS method helped me develop a deeper, more structured relationship with God. I've maintained a 90-day prayer streak!",
+      quote: "Theolyte has completely transformed my prayer life. The ACTS method helped me develop a deeper relationship with God.",
       author: "Sarah Mitchell",
-      role: "Youth Pastor, Grace Community Church",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
-      location: "Austin, TX"
+      role: "Youth Pastor",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80"
     },
     {
-      quote: "The community prayer feature connected me with believers worldwide during my cancer journey. Knowing thousands were praying for me gave me strength I never knew I had.",
+      quote: "The community prayer feature connected me with believers worldwide during my cancer journey. Knowing thousands were praying gave me strength.",
       author: "David Kim",
       role: "Small Group Leader",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
-      location: "Seoul, South Korea"
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80"
     },
     {
-      quote: "Finally, an app that takes spiritual growth seriously. The devotional plans and Bible reader are beautifully designed. It's like having a personal spiritual director in my pocket.",
+      quote: "Finally, an app that takes spiritual growth seriously. It's like having a personal spiritual director in my pocket.",
       author: "Grace Okonkwo",
       role: "Ministry Director",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
-      location: "Lagos, Nigeria"
-    },
-    {
-      quote: "The fasting tracker helped our church complete a 21-day corporate fast. The community features kept everyone encouraged and accountable throughout the journey.",
-      author: "Pastor Michael Chen",
-      role: "Senior Pastor, New Life Fellowship",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80",
-      location: "Vancouver, Canada"
-    },
-    {
-      quote: "I've tried many Christian apps, but Sanctum AI is different. The AI-powered scripture suggestions during prayer time always seem to speak directly to my situation.",
-      author: "Rebecca Thompson",
-      role: "Worship Leader",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80",
-      location: "Nashville, TN"
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
     }
   ];
 
@@ -224,15 +182,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onChangeView }) => {
       name: 'Free',
       price: '$0',
       period: 'forever',
-      description: 'Perfect for starting your spiritual journey',
-      features: [
-        'Daily devotionals',
-        'Basic prayer tracking',
-        'Bible reader (KJV)',
-        'Personal journal',
-        'Community prayer wall',
-        '7-day prayer history'
-      ],
+      description: 'Perfect for starting your journey',
+      features: ['Daily devotionals', 'Basic prayer tracking', 'Bible reader (KJV)', 'Personal journal', 'Community prayer wall'],
       cta: 'Get Started Free',
       highlighted: false
     },
@@ -240,130 +191,102 @@ const LandingPage: React.FC<LandingPageProps> = ({ onChangeView }) => {
       name: 'Believer',
       price: '$9.99',
       period: '/month',
-      description: 'For dedicated disciples seeking deeper growth',
-      features: [
-        'Everything in Free',
-        'AI-powered prayer insights',
-        'All Bible translations',
-        'Advanced fasting tracker',
-        'Unlimited testimonies',
-        'Prayer analytics & insights',
-        'Offline access',
-        'Audio Bible',
-        'Priority support'
-      ],
-      cta: 'Start 7-Day Free Trial',
+      description: 'For dedicated disciples',
+      features: ['Everything in Free', 'AI-powered insights', 'All Bible translations', 'Advanced fasting tracker', 'Prayer analytics', 'Offline access', 'Priority support'],
+      cta: 'Start Free Trial',
       highlighted: true
     },
     {
       name: 'Ministry',
       price: '$29.99',
       period: '/month',
-      description: 'For churches and small groups',
-      features: [
-        'Everything in Believer',
-        'Up to 50 members',
-        'Group prayer chains',
-        'Shared devotional plans',
-        'Ministry dashboard',
-        'Member analytics',
-        'Custom branding',
-        'API access',
-        'Dedicated support'
-      ],
+      description: 'For churches and groups',
+      features: ['Everything in Believer', 'Up to 50 members', 'Group prayer chains', 'Ministry dashboard', 'Custom branding', 'Dedicated support'],
       cta: 'Contact Sales',
       highlighted: false
     }
   ];
 
   const faqs = [
-    {
-      question: "What makes Sanctum AI different from other Christian apps?",
-      answer: "Sanctum AI combines the power of artificial intelligence with time-tested spiritual disciplines. Our AI doesn't replace your relationship with God—it enhances it by suggesting relevant scriptures, providing personalized devotionals, and helping you build consistent prayer habits. Plus, our global community feature connects you with believers worldwide for mutual encouragement and prayer support."
-    },
-    {
-      question: "Is my prayer data private and secure?",
-      answer: "Absolutely. Your spiritual journey is sacred, and we treat it that way. All prayer entries, journal writings, and personal data are encrypted end-to-end. We never sell your data or use it for advertising. You can also choose to make prayer requests anonymous when sharing with the community."
-    },
-    {
-      question: "Can I use Sanctum AI offline?",
-      answer: "Yes! Believer and Ministry plan subscribers can download devotionals, Bible passages, and their prayer history for offline access. Perfect for retreats, mission trips, or areas with limited connectivity."
-    },
-    {
-      question: "How does the AI-powered prayer feature work?",
-      answer: "When you write a prayer or share a concern, our AI analyzes the themes and emotions to suggest relevant Bible verses, prayers from Scripture, and devotional content. It's like having a concordance that understands context. The AI learns your preferences over time to provide increasingly personalized suggestions."
-    },
-    {
-      question: "Is Sanctum AI suitable for my church or small group?",
-      answer: "Absolutely! Our Ministry plan is designed specifically for churches and small groups. You can create shared prayer chains, assign devotional plans to your group, track engagement, and foster community through our group features. Many churches use Sanctum AI for corporate fasting events and prayer initiatives."
-    },
-    {
-      question: "What denominations is Sanctum AI designed for?",
-      answer: "Sanctum AI is designed for all Christians, regardless of denomination. Our content focuses on core Christian beliefs and practices that unite believers across traditions. You can customize your experience based on your theological preferences and devotional style."
-    }
+    { question: "What makes Theolyte different?", answer: "Theolyte combines AI with time-tested spiritual disciplines. Our AI enhances your relationship with God by suggesting relevant scriptures and helping build consistent prayer habits." },
+    { question: "Is my prayer data private?", answer: "Absolutely. All data is encrypted end-to-end. We never sell your data. You can make prayer requests anonymous when sharing with the community." },
+    { question: "Can I use Theolyte offline?", answer: "Yes! Believer and Ministry subscribers can download devotionals, Bible passages, and prayer history for offline access." },
+    { question: "Is Theolyte suitable for my church?", answer: "Yes! Our Ministry plan is designed for churches and small groups with shared prayer chains, group devotionals, and engagement tracking." }
   ];
 
   const journeySteps = [
-    {
-      step: '01',
-      title: 'Create Your Sanctuary',
-      description: 'Sign up in seconds and personalize your spiritual dashboard. Set your prayer times, choose your Bible translation, and define your spiritual goals.',
-      icon: Shield,
-      color: 'from-gold-400 to-gold-600'
-    },
-    {
-      step: '02',
-      title: 'Build Daily Habits',
-      description: 'Follow guided devotionals, track your prayer streaks, and develop consistent spiritual disciplines. Our gentle reminders keep you on track without being intrusive.',
-      icon: Clock,
-      color: 'from-emerald-400 to-emerald-600'
-    },
-    {
-      step: '03',
-      title: 'Grow Together',
-      description: 'Connect with believers worldwide, share testimonies, and experience the power of community prayer. Your faith journey is better when shared.',
-      icon: TrendingUp,
-      color: 'from-indigo-400 to-indigo-600'
-    }
+    { step: '01', title: 'Create Your Sanctuary', description: 'Sign up and personalize your spiritual dashboard.', icon: Shield },
+    { step: '02', title: 'Build Daily Habits', description: 'Follow guided devotionals and track your prayer streaks.', icon: Clock },
+    { step: '03', title: 'Grow Together', description: 'Connect with believers and experience community prayer.', icon: TrendingUp }
   ];
+
+  // Dashboard animation states
+  const [dashboardAnimated, setDashboardAnimated] = useState(false);
+  
+  useEffect(() => {
+    if (isDashboardInView && !dashboardAnimated) {
+      setDashboardAnimated(true);
+    }
+  }, [isDashboardInView, dashboardAnimated]);
 
   return (
     <div className="min-h-screen bg-stone-50 overflow-x-hidden overflow-y-auto">
       <ParticleBackground />
       
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-transparent'
-      }`}>
+      <motion.nav 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-white/80 backdrop-blur-sm'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Cross className="text-white" size={20} />
+          <motion.div 
+            className="flex items-center gap-3"
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 400 }}
+          >
+            <div className="w-10 h-10 bg-stone-900 rounded-xl flex items-center justify-center">
+              <Cross className="text-gold-400" size={20} />
             </div>
-            <span className="text-2xl font-serif font-semibold text-stone-800">Sanctum AI</span>
-          </div>
+            <span className="text-2xl font-serif font-semibold text-stone-800">Theolyte</span>
+          </motion.div>
           
           <div className="hidden md:flex items-center gap-8">
-            <a href="#what-is" className="text-stone-600 hover:text-stone-900 transition-colors">What is Sanctum?</a>
-            <a href="#features" className="text-stone-600 hover:text-stone-900 transition-colors">Features</a>
-            <a href="#testimonials" className="text-stone-600 hover:text-stone-900 transition-colors">Testimonials</a>
-            <a href="#pricing" className="text-stone-600 hover:text-stone-900 transition-colors">Pricing</a>
-            <a href="#faq" className="text-stone-600 hover:text-stone-900 transition-colors">FAQ</a>
+            {['Features', 'Testimonials', 'Pricing', 'FAQ'].map((item, index) => (
+              <motion.a 
+                key={item}
+                href={`#${item.toLowerCase()}`} 
+                className="text-stone-600 hover:text-stone-900 transition-colors text-sm font-medium"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -2 }}
+              >
+                {item}
+              </motion.a>
+            ))}
           </div>
           
-          <div className="flex items-center gap-4">
-            <button 
+          <div className="flex items-center gap-3">
+            <motion.button 
               onClick={() => onChangeView(ViewState.SIGNIN)}
               className="hidden sm:block text-stone-600 hover:text-stone-900 font-medium transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               Sign In
-            </button>
-            <button 
+            </motion.button>
+            <motion.button 
               onClick={() => onChangeView(ViewState.SIGNUP)}
-              className="bg-gradient-to-r from-gold-500 to-gold-600 text-white px-5 py-2.5 rounded-xl font-medium hover:from-gold-600 hover:to-gold-700 transition-all shadow-lg shadow-gold-500/25 hover:shadow-gold-500/40"
+              className="bg-stone-900 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-stone-800 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               Get Started
-            </button>
+            </motion.button>
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 text-stone-600"
@@ -373,147 +296,196 @@ const LandingPage: React.FC<LandingPageProps> = ({ onChangeView }) => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-stone-200 px-6 py-4 space-y-4">
-            <a href="#what-is" className="block text-stone-600 hover:text-stone-900">What is Sanctum?</a>
-            <a href="#features" className="block text-stone-600 hover:text-stone-900">Features</a>
-            <a href="#testimonials" className="block text-stone-600 hover:text-stone-900">Testimonials</a>
-            <a href="#pricing" className="block text-stone-600 hover:text-stone-900">Pricing</a>
-            <a href="#faq" className="block text-stone-600 hover:text-stone-900">FAQ</a>
-            <button 
-              onClick={() => onChangeView(ViewState.SIGNIN)}
-              className="block text-gold-600 font-medium"
-            >
-              Sign In
-            </button>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-white border-t border-stone-100 px-6 py-4 space-y-4"
+          >
+            {['Features', 'Testimonials', 'Pricing', 'FAQ'].map((item) => (
+              <a key={item} href={`#${item.toLowerCase()}`} className="block text-stone-600 hover:text-stone-900">{item}</a>
+            ))}
+            <button onClick={() => onChangeView(ViewState.SIGNIN)} className="block text-stone-800 font-medium">Sign In</button>
+          </motion.div>
         )}
-      </nav>
+      </motion.nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-gold-50/50 via-transparent to-transparent" />
-        
-        {/* Decorative Elements */}
-        <div className="absolute top-40 left-10 w-72 h-72 bg-gold-200/30 rounded-full blur-3xl" />
-        <div className="absolute top-60 right-10 w-96 h-96 bg-indigo-200/20 rounded-full blur-3xl" />
-        
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-gold-100 text-gold-700 px-4 py-2 rounded-full text-sm font-medium mb-8">
-              <Sparkles size={16} />
-              <span>Trusted by 50,000+ believers worldwide</span>
-            </div>
+      <section ref={heroRef} className="relative pt-28 pb-16 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div 
+            className="text-center max-w-3xl mx-auto mb-12"
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+          >
+            <motion.p 
+              variants={fadeInUp}
+              className="text-gold-600 font-medium mb-4 text-sm tracking-wide uppercase"
+            >
+              Trusted by 50,000+ believers worldwide
+            </motion.p>
             
-            <h1 className="text-5xl md:text-7xl font-serif text-stone-900 mb-6 leading-tight">
+            <motion.h1 
+              variants={fadeInUp}
+              className="text-4xl md:text-6xl font-serif text-stone-900 mb-6 leading-tight"
+            >
               Your Personal
               <br />
-              <span className="bg-gradient-to-r from-gold-500 to-gold-700 bg-clip-text text-transparent">
-                Spiritual Growth Companion
-              </span>
-            </h1>
+              <span className="text-stone-600">Spiritual Growth Companion</span>
+            </motion.h1>
             
-            <p className="text-xl md:text-2xl text-stone-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Sanctum AI is the all-in-one platform that helps Christians deepen their faith through 
-              <span className="text-stone-800 font-medium"> structured prayer</span>, 
-              <span className="text-stone-800 font-medium"> daily devotionals</span>, 
-              <span className="text-stone-800 font-medium"> Bible study</span>, and 
-              <span className="text-stone-800 font-medium"> global community</span>.
-            </p>
+            <motion.p 
+              variants={fadeInUp}
+              className="text-lg text-stone-500 mb-8 max-w-2xl mx-auto leading-relaxed"
+            >
+              Deepen your faith through structured prayer, daily devotionals, 
+              Bible study, and a global community of believers.
+            </motion.p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-              <button 
+            <motion.div 
+              variants={fadeInUp}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            >
+              <motion.button 
                 onClick={() => onChangeView(ViewState.SIGNUP)}
-                className="group bg-gradient-to-r from-stone-800 to-stone-900 text-white px-8 py-4 rounded-xl font-medium hover:from-stone-900 hover:to-black transition-all shadow-xl shadow-stone-900/20 flex items-center gap-3"
+                className="bg-stone-900 text-white px-8 py-3.5 rounded-lg font-medium hover:bg-stone-800 transition-colors flex items-center gap-2"
+                whileHover={{ scale: 1.05, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.3)" }}
+                whileTap={{ scale: 0.95 }}
               >
                 Start Your Journey Free
-                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button className="flex items-center gap-3 text-stone-600 hover:text-stone-900 font-medium px-6 py-4 rounded-xl hover:bg-white/50 transition-all">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <Play size={18} className="text-gold-600 ml-1" />
-                </div>
-                Watch 2-Min Demo
-              </button>
-            </div>
+                <ArrowRight size={18} />
+              </motion.button>
+              <motion.button 
+                className="flex items-center gap-3 text-stone-600 hover:text-stone-900 font-medium px-6 py-3.5 transition-colors"
+                whileHover={{ scale: 1.05 }}
+              >
+                <motion.div 
+                  className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center"
+                  whileHover={{ scale: 1.1, backgroundColor: "#f5f5f4" }}
+                >
+                  <Play size={16} className="text-stone-600 ml-0.5" />
+                </motion.div>
+                Watch Demo
+              </motion.button>
+            </motion.div>
 
-            <p className="text-stone-500 text-sm">No credit card required • Free forever plan available</p>
-          </div>
+            <motion.p 
+              variants={fadeInUp}
+              className="text-stone-400 text-sm mt-6"
+            >
+              No credit card required
+            </motion.p>
+          </motion.div>
           
-          {/* Hero Image/Preview - Full Dashboard Preview */}
-          <div className="mt-16 relative">
-            <div className="absolute inset-0 bg-gradient-to-t from-stone-50 via-transparent to-transparent z-10 pointer-events-none" />
-            <div className="bg-white rounded-2xl shadow-2xl shadow-stone-900/10 border border-stone-200 overflow-hidden mx-auto max-w-6xl">
+          {/* Animated Dashboard Preview */}
+          <motion.div 
+            ref={dashboardRef}
+            className="relative max-w-5xl mx-auto"
+            style={{ y: dashboardY, opacity: dashboardOpacity }}
+          >
+            <motion.div 
+              className="bg-white rounded-2xl shadow-2xl shadow-stone-900/10 border border-stone-200 overflow-hidden"
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              animate={isDashboardInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              {/* Browser Chrome */}
               <div className="bg-stone-100 px-4 py-3 flex items-center gap-2 border-b border-stone-200">
-                <div className="w-3 h-3 rounded-full bg-rose-400" />
-                <div className="w-3 h-3 rounded-full bg-amber-400" />
-                <div className="w-3 h-3 rounded-full bg-emerald-400" />
-                <span className="ml-4 text-sm text-stone-500">Sanctum AI Dashboard</span>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="text-xs text-stone-400">sanctum.ai/dashboard</span>
-                </div>
+                <motion.div 
+                  className="w-3 h-3 rounded-full bg-rose-400"
+                  initial={{ scale: 0 }}
+                  animate={isDashboardInView ? { scale: 1 } : {}}
+                  transition={{ delay: 0.3 }}
+                />
+                <motion.div 
+                  className="w-3 h-3 rounded-full bg-amber-400"
+                  initial={{ scale: 0 }}
+                  animate={isDashboardInView ? { scale: 1 } : {}}
+                  transition={{ delay: 0.4 }}
+                />
+                <motion.div 
+                  className="w-3 h-3 rounded-full bg-emerald-400"
+                  initial={{ scale: 0 }}
+                  animate={isDashboardInView ? { scale: 1 } : {}}
+                  transition={{ delay: 0.5 }}
+                />
+                <span className="ml-4 text-sm text-stone-500">Theolyte Dashboard</span>
               </div>
               
               <div className="flex">
                 {/* Sidebar Preview */}
-                <div className="hidden lg:block w-64 bg-stone-900 p-4 border-r border-stone-800">
+                <motion.div 
+                  className="hidden lg:block w-64 bg-stone-900 p-4 border-r border-stone-800"
+                  initial={{ x: -50, opacity: 0 }}
+                  animate={isDashboardInView ? { x: 0, opacity: 1 } : {}}
+                  transition={{ delay: 0.4, duration: 0.6 }}
+                >
                   <div className="flex items-center gap-3 mb-8">
-                    <div className="w-10 h-10 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center">
+                    <motion.div 
+                      className="w-10 h-10 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                    >
                       <Cross className="text-white" size={18} />
-                    </div>
-                    <span className="text-white font-serif font-semibold">Sanctum AI</span>
+                    </motion.div>
+                    <span className="text-white font-serif font-semibold">Theolyte</span>
                   </div>
                   
                   <div className="space-y-1">
-                    <div className="flex items-center gap-3 px-3 py-2.5 bg-gold-500/20 rounded-lg text-gold-400">
-                      <Sun size={18} />
-                      <span className="text-sm font-medium">Dashboard</span>
-                    </div>
-                    <div className="flex items-center gap-3 px-3 py-2.5 text-stone-400 hover:bg-white/5 rounded-lg">
-                      <Heart size={18} />
-                      <span className="text-sm">Prayer Architect</span>
-                    </div>
-                    <div className="flex items-center gap-3 px-3 py-2.5 text-stone-400 hover:bg-white/5 rounded-lg">
-                      <BookOpen size={18} />
-                      <span className="text-sm">Bible Reader</span>
-                    </div>
-                    <div className="flex items-center gap-3 px-3 py-2.5 text-stone-400 hover:bg-white/5 rounded-lg">
-                      <Sunrise size={18} />
-                      <span className="text-sm">Devotionals</span>
-                    </div>
-                    <div className="flex items-center gap-3 px-3 py-2.5 text-stone-400 hover:bg-white/5 rounded-lg">
-                      <Flame size={18} />
-                      <span className="text-sm">Fasting Tracker</span>
-                    </div>
-                    <div className="flex items-center gap-3 px-3 py-2.5 text-stone-400 hover:bg-white/5 rounded-lg">
-                      <Users size={18} />
-                      <span className="text-sm">Community</span>
-                    </div>
-                    <div className="flex items-center gap-3 px-3 py-2.5 text-stone-400 hover:bg-white/5 rounded-lg">
-                      <Star size={18} />
-                      <span className="text-sm">Testimonies</span>
-                    </div>
-                    <div className="flex items-center gap-3 px-3 py-2.5 text-stone-400 hover:bg-white/5 rounded-lg">
-                      <Feather size={18} />
-                      <span className="text-sm">Journal</span>
-                    </div>
-                    <div className="flex items-center gap-3 px-3 py-2.5 text-stone-400 hover:bg-white/5 rounded-lg">
-                      <Target size={18} />
-                      <span className="text-sm">Vision Wall</span>
-                    </div>
+                    {[
+                      { icon: Sun, label: 'Dashboard', active: true },
+                      { icon: Heart, label: 'Prayer Architect', active: false },
+                      { icon: BookOpen, label: 'Bible Reader', active: false },
+                      { icon: Sunrise, label: 'Devotionals', active: false },
+                      { icon: Flame, label: 'Fasting Tracker', active: false },
+                      { icon: Users, label: 'Community', active: false },
+                      { icon: Star, label: 'Testimonies', active: false },
+                      { icon: Feather, label: 'Journal', active: false },
+                      { icon: Target, label: 'Vision Wall', active: false }
+                    ].map((item, index) => (
+                      <motion.div 
+                        key={item.label}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg ${
+                          item.active ? 'bg-gold-500/20 text-gold-400' : 'text-stone-400 hover:bg-white/5'
+                        }`}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={isDashboardInView ? { x: 0, opacity: 1 } : {}}
+                        transition={{ delay: 0.5 + index * 0.05 }}
+                        whileHover={{ x: 4 }}
+                      >
+                        <item.icon size={18} />
+                        <span className="text-sm font-medium">{item.label}</span>
+                      </motion.div>
+                    ))}
                   </div>
                   
-                  <div className="mt-8 p-3 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl">
+                  <motion.div 
+                    className="mt-8 p-3 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={isDashboardInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ delay: 1 }}
+                    whileHover={{ scale: 1.02 }}
+                  >
                     <p className="text-xs text-indigo-200 mb-1">Upgrade to Pro</p>
                     <p className="text-sm text-white font-medium">Unlock AI Features</p>
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
                 
                 {/* Main Dashboard Content */}
-                <div className="flex-1 p-6 bg-gradient-to-br from-stone-50 to-white">
+                <motion.div 
+                  className="flex-1 p-6 bg-gradient-to-br from-stone-50 to-white"
+                  initial={{ opacity: 0 }}
+                  animate={isDashboardInView ? { opacity: 1 } : {}}
+                  transition={{ delay: 0.6 }}
+                >
                   {/* Header */}
-                  <div className="flex items-center justify-between mb-6">
+                  <motion.div 
+                    className="flex items-center justify-between mb-6"
+                    initial={{ y: -20, opacity: 0 }}
+                    animate={isDashboardInView ? { y: 0, opacity: 1 } : {}}
+                    transition={{ delay: 0.7 }}
+                  >
                     <div>
                       <div className="flex items-center gap-2 text-amber-600 mb-1">
                         <Sun size={16} />
@@ -522,7 +494,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onChangeView }) => {
                       <h2 className="text-2xl font-serif text-stone-800">Begin your day with purpose.</h2>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="bg-gradient-to-br from-orange-500 to-amber-600 px-4 py-2 rounded-xl text-white">
+                      <motion.div 
+                        className="bg-gradient-to-br from-orange-500 to-amber-600 px-4 py-2 rounded-xl text-white"
+                        whileHover={{ scale: 1.05 }}
+                        initial={{ scale: 0 }}
+                        animate={isDashboardInView ? { scale: 1 } : {}}
+                        transition={{ delay: 0.9, type: "spring" }}
+                      >
                         <div className="flex items-center gap-2">
                           <Flame size={18} className="text-yellow-200" />
                           <div>
@@ -530,16 +508,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onChangeView }) => {
                             <p className="text-lg font-serif">21 Days</p>
                           </div>
                         </div>
-                      </div>
-                      <div className="bg-white px-4 py-2 rounded-xl border border-stone-200">
+                      </motion.div>
+                      <motion.div 
+                        className="bg-white px-4 py-2 rounded-xl border border-stone-200"
+                        initial={{ scale: 0 }}
+                        animate={isDashboardInView ? { scale: 1 } : {}}
+                        transition={{ delay: 1, type: "spring" }}
+                      >
                         <p className="text-xs text-stone-400">Next Prayer</p>
                         <p className="text-sm font-medium text-stone-800">12:00 PM</p>
-                      </div>
+                      </motion.div>
                     </div>
-                  </div>
+                  </motion.div>
                   
                   {/* Active Devotional Banner */}
-                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between mb-6">
+                  <motion.div 
+                    className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between mb-6"
+                    initial={{ x: 50, opacity: 0 }}
+                    animate={isDashboardInView ? { x: 0, opacity: 1 } : {}}
+                    transition={{ delay: 0.8 }}
+                    whileHover={{ scale: 1.01 }}
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
                         <BookOpen size={18} className="text-amber-600" />
@@ -550,12 +539,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onChangeView }) => {
                       </div>
                     </div>
                     <span className="text-xs text-stone-500">Day 12 of 30</span>
-                  </div>
+                  </motion.div>
                   
                   <div className="grid grid-cols-3 gap-4">
                     {/* Main Prayer Card */}
-                    <div className="col-span-2 bg-gradient-to-br from-stone-800 to-stone-900 rounded-xl p-6 text-white relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-gold-500/10 rounded-full blur-2xl -mr-8 -mt-8" />
+                    <motion.div 
+                      className="col-span-2 bg-gradient-to-br from-stone-800 to-stone-900 rounded-xl p-6 text-white relative overflow-hidden cursor-pointer"
+                      initial={{ y: 30, opacity: 0 }}
+                      animate={isDashboardInView ? { y: 0, opacity: 1 } : {}}
+                      transition={{ delay: 0.9 }}
+                      whileHover={{ scale: 1.02, boxShadow: "0 20px 40px -20px rgba(0,0,0,0.4)" }}
+                    >
+                      <motion.div 
+                        className="absolute top-0 right-0 w-32 h-32 bg-gold-500/10 rounded-full blur-2xl -mr-8 -mt-8"
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                      />
                       <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-3 text-gold-400">
                           <Sun size={16} />
@@ -563,51 +562,61 @@ const LandingPage: React.FC<LandingPageProps> = ({ onChangeView }) => {
                         </div>
                         <h3 className="text-xl font-serif mb-2">Architect your prayer.</h3>
                         <p className="text-sm text-stone-400 mb-4">Enter a guided session using the A.C.T.S. model.</p>
-                        <button className="bg-gold-600 hover:bg-gold-500 text-stone-900 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+                        <motion.button 
+                          className="bg-gold-600 hover:bg-gold-500 text-stone-900 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
                           Start Session <ArrowRight size={14} />
-                        </button>
+                        </motion.button>
                       </div>
-                    </div>
+                    </motion.div>
                     
                     {/* Daily Verse */}
-                    <div className="bg-white rounded-xl p-4 border border-stone-200 flex flex-col justify-center">
+                    <motion.div 
+                      className="bg-white rounded-xl p-4 border border-stone-200 flex flex-col justify-center"
+                      initial={{ y: 30, opacity: 0 }}
+                      animate={isDashboardInView ? { y: 0, opacity: 1 } : {}}
+                      transition={{ delay: 1 }}
+                      whileHover={{ scale: 1.02 }}
+                    >
                       <Quote className="text-stone-200 w-8 h-8 mb-2" />
                       <p className="text-sm font-serif text-stone-700 italic leading-relaxed mb-2">
                         "Trust in the LORD with all your heart..."
                       </p>
                       <span className="text-xs text-gold-600 font-medium">Proverbs 3:5</span>
-                    </div>
+                    </motion.div>
                     
                     {/* Stats Row */}
-                    <div className="bg-white rounded-xl p-4 border border-stone-200">
-                      <div className="flex items-center gap-2 text-emerald-600 mb-2">
-                        <TrendingUp size={14} />
-                        <span className="text-xs font-medium">This Week</span>
-                      </div>
-                      <p className="text-2xl font-serif text-stone-800">4.5 hrs</p>
-                      <p className="text-xs text-stone-500">Prayer time</p>
-                    </div>
-                    
-                    <div className="bg-white rounded-xl p-4 border border-stone-200">
-                      <div className="flex items-center gap-2 text-indigo-600 mb-2">
-                        <Users size={14} />
-                        <span className="text-xs font-medium">Community</span>
-                      </div>
-                      <p className="text-2xl font-serif text-stone-800">1,247</p>
-                      <p className="text-xs text-stone-500">Praying for you</p>
-                    </div>
-                    
-                    <div className="bg-white rounded-xl p-4 border border-stone-200">
-                      <div className="flex items-center gap-2 text-rose-600 mb-2">
-                        <Star size={14} />
-                        <span className="text-xs font-medium">Testimonies</span>
-                      </div>
-                      <p className="text-2xl font-serif text-stone-800">23</p>
-                      <p className="text-xs text-stone-500">Answered prayers</p>
-                    </div>
+                    {[
+                      { icon: TrendingUp, label: 'This Week', value: '4.5 hrs', sub: 'Prayer time', color: 'text-emerald-600' },
+                      { icon: Users, label: 'Community', value: '1,247', sub: 'Praying for you', color: 'text-indigo-600' },
+                      { icon: Star, label: 'Testimonies', value: '23', sub: 'Answered prayers', color: 'text-rose-600' }
+                    ].map((stat, index) => (
+                      <motion.div 
+                        key={stat.label}
+                        className="bg-white rounded-xl p-4 border border-stone-200"
+                        initial={{ y: 30, opacity: 0 }}
+                        animate={isDashboardInView ? { y: 0, opacity: 1 } : {}}
+                        transition={{ delay: 1.1 + index * 0.1 }}
+                        whileHover={{ scale: 1.05, y: -5 }}
+                      >
+                        <div className={`flex items-center gap-2 ${stat.color} mb-2`}>
+                          <stat.icon size={14} />
+                          <span className="text-xs font-medium">{stat.label}</span>
+                        </div>
+                        <p className="text-2xl font-serif text-stone-800">{stat.value}</p>
+                        <p className="text-xs text-stone-500">{stat.sub}</p>
+                      </motion.div>
+                    ))}
                     
                     {/* Weekly Chart Preview */}
-                    <div className="col-span-2 bg-white rounded-xl p-4 border border-stone-200">
+                    <motion.div 
+                      className="col-span-2 bg-white rounded-xl p-4 border border-stone-200"
+                      initial={{ y: 30, opacity: 0 }}
+                      animate={isDashboardInView ? { y: 0, opacity: 1 } : {}}
+                      transition={{ delay: 1.4 }}
+                    >
                       <div className="flex justify-between items-center mb-4">
                         <div>
                           <h4 className="text-sm font-medium text-stone-800">Spiritual Rhythms</h4>
@@ -617,675 +626,685 @@ const LandingPage: React.FC<LandingPageProps> = ({ onChangeView }) => {
                       </div>
                       <div className="flex items-end gap-2 h-20">
                         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
-                          <div key={day} className="flex-1 flex flex-col items-center gap-1">
-                            <div 
+                          <motion.div 
+                            key={day} 
+                            className="flex-1 flex flex-col items-center gap-1"
+                            initial={{ scaleY: 0 }}
+                            animate={isDashboardInView ? { scaleY: 1 } : {}}
+                            transition={{ delay: 1.5 + i * 0.05, duration: 0.4 }}
+                            style={{ originY: 1 }}
+                          >
+                            <motion.div 
                               className={`w-full rounded-t ${i === 3 ? 'bg-gold-500' : 'bg-stone-200'}`}
                               style={{ height: `${[40, 60, 45, 80, 55, 70, 50][i]}%` }}
+                              whileHover={{ backgroundColor: i === 3 ? '#b4941f' : '#d6d3d1' }}
                             />
                             <span className="text-[10px] text-stone-400">{day}</span>
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                     
                     {/* Quick Actions */}
-                    <div className="bg-white rounded-xl p-4 border border-stone-200">
+                    <motion.div 
+                      className="bg-white rounded-xl p-4 border border-stone-200"
+                      initial={{ y: 30, opacity: 0 }}
+                      animate={isDashboardInView ? { y: 0, opacity: 1 } : {}}
+                      transition={{ delay: 1.5 }}
+                    >
                       <p className="text-xs font-medium text-stone-600 mb-3">Quick Actions</p>
                       <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-xs text-stone-700 p-2 bg-stone-50 rounded-lg">
-                          <BookOpen size={12} /> Read Bible
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-stone-700 p-2 bg-stone-50 rounded-lg">
-                          <Feather size={12} /> Write Journal
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-stone-700 p-2 bg-stone-50 rounded-lg">
-                          <Users size={12} /> Community
-                        </div>
+                        {[
+                          { icon: BookOpen, label: 'Read Bible' },
+                          { icon: Feather, label: 'Write Journal' },
+                          { icon: Users, label: 'Community' }
+                        ].map((action, index) => (
+                          <motion.div 
+                            key={action.label}
+                            className="flex items-center gap-2 text-xs text-stone-700 p-2 bg-stone-50 rounded-lg cursor-pointer"
+                            whileHover={{ backgroundColor: '#f5f5f4', x: 4 }}
+                            initial={{ x: -10, opacity: 0 }}
+                            animate={isDashboardInView ? { x: 0, opacity: 1 } : {}}
+                            transition={{ delay: 1.6 + index * 0.1 }}
+                          >
+                            <action.icon size={12} /> {action.label}
+                          </motion.div>
+                        ))}
                       </div>
-                    </div>
+                    </motion.div>
                   </div>
-                </div>
+                </motion.div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Scroll indicator */}
-          <div className="flex justify-center mt-12">
-            <a href="#what-is" className="flex flex-col items-center text-stone-400 hover:text-stone-600 transition-colors">
+          <motion.div 
+            className="flex justify-center mt-12"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5 }}
+          >
+            <motion.a 
+              href="#stats" 
+              className="flex flex-col items-center text-stone-400 hover:text-stone-600 transition-colors"
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
               <span className="text-sm mb-2">Learn More</span>
-              <ArrowDown size={20} className="animate-bounce" />
-            </a>
-          </div>
+              <ArrowDown size={20} />
+            </motion.a>
+          </motion.div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 px-6 bg-white border-y border-stone-200">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section id="stats" className="py-16 px-6 bg-white border-y border-stone-100">
+        <div className="max-w-6xl mx-auto">
+          <motion.div 
+            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+          >
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="w-12 h-12 bg-gold-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <stat.icon className="text-gold-600" size={24} />
-                </div>
-                <p className="text-4xl md:text-5xl font-serif text-stone-900 mb-2">{stat.value}</p>
-                <p className="text-stone-500">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* What is Sanctum AI Section */}
-      <section id="what-is" className="py-24 px-6 bg-gradient-to-b from-white to-stone-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                <Lightbulb size={16} />
-                <span>Understanding Sanctum AI</span>
-              </div>
-              
-              <h2 className="text-4xl md:text-5xl font-serif text-stone-900 mb-6 leading-tight">
-                What is <span className="text-gold-600">Sanctum AI</span>?
-              </h2>
-              
-              <p className="text-xl text-stone-600 mb-6 leading-relaxed">
-                Sanctum AI is a <strong>comprehensive spiritual growth platform</strong> designed specifically for Christians who want to deepen their relationship with God through consistent, meaningful spiritual practices.
-              </p>
-              
-              <p className="text-lg text-stone-600 mb-8 leading-relaxed">
-                Think of it as your <strong>personal spiritual companion</strong> that combines the wisdom of traditional Christian disciplines with modern technology. Whether you're a new believer taking your first steps or a seasoned Christian seeking deeper intimacy with God, Sanctum AI meets you where you are.
-              </p>
-
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-gold-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Cross className="text-gold-600" size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-stone-800 mb-1">Rooted in Scripture</h4>
-                    <p className="text-stone-600">Every feature is designed to draw you closer to God's Word and help you apply it to your daily life.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="text-indigo-600" size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-stone-800 mb-1">AI-Enhanced, Not AI-Replaced</h4>
-                    <p className="text-stone-600">Our AI suggests scriptures and insights, but your relationship with God remains personal and authentic.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Heart className="text-rose-600" size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-stone-800 mb-1">Community-Centered</h4>
-                    <p className="text-stone-600">Faith grows best in community. Connect with believers worldwide who share your journey.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-gold-200/30 to-indigo-200/30 rounded-3xl blur-3xl" />
-              <div className="relative bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden">
-                <div className="p-8">
-                  <h3 className="text-2xl font-serif text-stone-900 mb-6">Sanctum AI Helps You:</h3>
-                  <div className="space-y-4">
-                    {[
-                      { icon: BookOpen, text: "Read and understand the Bible daily" },
-                      { icon: Heart, text: "Build a consistent, meaningful prayer life" },
-                      { icon: Flame, text: "Practice spiritual disciplines like fasting" },
-                      { icon: Users, text: "Connect with a global community of believers" },
-                      { icon: Star, text: "Document and remember God's faithfulness" },
-                      { icon: Target, text: "Discover and pursue your God-given purpose" },
-                      { icon: Feather, text: "Journal your spiritual journey" },
-                      { icon: Bell, text: "Stay accountable with gentle reminders" }
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-center gap-4 p-3 bg-stone-50 rounded-xl">
-                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                          <item.icon className="text-gold-600" size={20} />
-                        </div>
-                        <span className="text-stone-700 font-medium">{item.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Problems We Solve Section */}
-      <section className="py-24 px-6 bg-stone-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-96 h-96 bg-gold-400 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-indigo-400 rounded-full blur-3xl" />
-        </div>
-        
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-white/10 text-gold-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <HandHeart size={16} />
-              <span>We Understand Your Struggles</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif mb-4">
-              Common Challenges
-              <br />
-              <span className="text-gold-400">We Help You Overcome</span>
-            </h2>
-            <p className="text-xl text-stone-400 max-w-2xl mx-auto">
-              Every believer faces obstacles in their spiritual journey. Sanctum AI is designed to help you overcome them.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {problemsSolved.map((item, index) => (
-              <div 
-                key={index}
-                className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all"
+              <motion.div 
+                key={index} 
+                className="text-center"
+                variants={fadeInUp}
               >
-                <div className="w-12 h-12 bg-gold-500/20 rounded-xl flex items-center justify-center mb-4">
-                  <item.icon className="text-gold-400" size={24} />
-                </div>
-                <h3 className="text-lg font-semibold text-white mb-2">{item.problem}</h3>
-                <p className="text-stone-400">{item.solution}</p>
-              </div>
+                <motion.p 
+                  className="text-3xl md:text-4xl font-serif text-stone-900 mb-1"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, type: "spring" }}
+                >
+                  {stat.value}
+                </motion.p>
+                <p className="text-stone-500 text-sm">{stat.label}</p>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Problems We Solve */}
+      <section className="py-16 px-6 bg-stone-50">
+        <div className="max-w-6xl mx-auto">
+          <motion.div 
+            className="text-center mb-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <p className="text-gold-600 font-medium mb-2 text-sm tracking-wide uppercase">We Understand</p>
+            <h2 className="text-3xl md:text-4xl font-serif text-stone-900">
+              Common Challenges We Help You Overcome
+            </h2>
+          </motion.div>
+          
+          <motion.div 
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={staggerContainer}
+          >
+            {problemsSolved.map((item, index) => (
+              <motion.div 
+                key={index}
+                className="bg-white rounded-lg p-5 border border-stone-200"
+                variants={fadeInUp}
+                whileHover={{ y: -5, boxShadow: "0 10px 30px -15px rgba(0,0,0,0.1)" }}
+              >
+                <motion.div 
+                  className="w-10 h-10 bg-stone-100 rounded-lg flex items-center justify-center mb-3"
+                  whileHover={{ scale: 1.1, backgroundColor: "#fef3c7" }}
+                >
+                  <item.icon className="text-stone-600" size={20} />
+                </motion.div>
+                <h3 className="font-semibold text-stone-800 mb-1">{item.problem}</h3>
+                <p className="text-stone-500 text-sm">{item.solution}</p>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <Zap size={16} />
-              <span>Powerful Features</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif text-stone-900 mb-4">
-              Everything You Need for
-              <br />
-              <span className="text-gold-600">Spiritual Growth</span>
+      <section id="features" className="py-16 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <motion.div 
+            className="text-center mb-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <p className="text-gold-600 font-medium mb-2 text-sm tracking-wide uppercase">Features</p>
+            <h2 className="text-3xl md:text-4xl font-serif text-stone-900">
+              Everything You Need for Spiritual Growth
             </h2>
-            <p className="text-xl text-stone-600 max-w-2xl mx-auto">
-              A comprehensive suite of tools designed to deepen your relationship with God 
-              and connect you with a community of believers.
-            </p>
-          </div>
+          </motion.div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div 
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-5"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={staggerContainer}
+          >
             {coreFeatures.map((feature, index) => (
-              <div 
+              <motion.div 
                 key={index}
-                className="group bg-white rounded-2xl p-8 border border-stone-200 hover:border-stone-300 hover:shadow-xl transition-all duration-300"
+                className="bg-stone-50 rounded-lg p-6 border border-stone-100 hover:border-stone-200 transition-colors"
+                variants={fadeInUp}
+                whileHover={{ y: -8, boxShadow: "0 20px 40px -20px rgba(0,0,0,0.1)" }}
               >
-                <div className={`w-14 h-14 ${feature.bg} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                  <feature.icon className={feature.color} size={28} />
-                </div>
-                <h3 className="text-xl font-semibold text-stone-900 mb-3">{feature.title}</h3>
-                <p className="text-stone-600 leading-relaxed mb-4">{feature.description}</p>
-                <ul className="space-y-2">
+                <motion.div 
+                  className="w-11 h-11 bg-stone-900 rounded-lg flex items-center justify-center mb-4"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                >
+                  <feature.icon className="text-gold-400" size={22} />
+                </motion.div>
+                <h3 className="text-lg font-semibold text-stone-900 mb-2">{feature.title}</h3>
+                <p className="text-stone-500 text-sm leading-relaxed mb-4">{feature.description}</p>
+                <ul className="space-y-1.5">
                   {feature.details.map((detail, dIndex) => (
-                    <li key={dIndex} className="flex items-center gap-2 text-sm text-stone-500">
-                      <CheckCircle2 size={14} className="text-emerald-500" />
+                    <motion.li 
+                      key={dIndex} 
+                      className="flex items-center gap-2 text-xs text-stone-400"
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: dIndex * 0.1 }}
+                    >
+                      <CheckCircle2 size={12} className="text-stone-400" />
                       {detail}
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="py-24 px-6 bg-gradient-to-b from-stone-100 to-stone-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <Milestone size={16} />
-              <span>Simple Process</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif text-stone-900 mb-4">
-              Your Journey to
-              <br />
-              <span className="text-gold-600">Deeper Faith</span>
+      <section className="py-16 px-6 bg-stone-50">
+        <div className="max-w-6xl mx-auto">
+          <motion.div 
+            className="text-center mb-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <p className="text-gold-600 font-medium mb-2 text-sm tracking-wide uppercase">How It Works</p>
+            <h2 className="text-3xl md:text-4xl font-serif text-stone-900">
+              Your Journey to Deeper Faith
             </h2>
-            <p className="text-xl text-stone-600 max-w-2xl mx-auto">
-              Start transforming your spiritual life in three simple steps
-            </p>
-          </div>
+          </motion.div>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <motion.div 
+            className="grid md:grid-cols-3 gap-6"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+          >
             {journeySteps.map((item, index) => (
-              <div key={index} className="relative">
-                <div className="bg-white rounded-2xl p-8 border border-stone-200 h-full hover:shadow-lg transition-shadow">
-                  <div className="text-6xl font-serif text-stone-200 mb-4">{item.step}</div>
-                  <div className={`w-14 h-14 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center mb-4 shadow-lg`}>
-                    <item.icon className="text-white" size={28} />
-                  </div>
-                  <h3 className="text-xl font-semibold text-stone-900 mb-3">{item.title}</h3>
-                  <p className="text-stone-600">{item.description}</p>
-                </div>
+              <motion.div key={index} className="relative" variants={fadeInUp}>
+                <motion.div 
+                  className="bg-white rounded-lg p-6 border border-stone-200"
+                  whileHover={{ y: -5, boxShadow: "0 15px 30px -15px rgba(0,0,0,0.1)" }}
+                >
+                  <div className="text-4xl font-serif text-stone-200 mb-3">{item.step}</div>
+                  <motion.div 
+                    className="w-10 h-10 bg-stone-900 rounded-lg flex items-center justify-center mb-3"
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    <item.icon className="text-gold-400" size={20} />
+                  </motion.div>
+                  <h3 className="text-lg font-semibold text-stone-900 mb-2">{item.title}</h3>
+                  <p className="text-stone-500 text-sm">{item.description}</p>
+                </motion.div>
                 {index < 2 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                    <ArrowRight className="text-stone-300" size={24} />
-                  </div>
+                  <motion.div 
+                    className="hidden md:block absolute top-1/2 -right-3 transform -translate-y-1/2 z-10"
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <ArrowRight className="text-stone-300" size={20} />
+                  </motion.div>
                 )}
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
-          <div className="text-center mt-12">
-            <button 
+          <motion.div 
+            className="text-center mt-10"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <motion.button 
               onClick={() => onChangeView(ViewState.SIGNUP)}
-              className="group bg-gradient-to-r from-gold-500 to-gold-600 text-white px-8 py-4 rounded-xl font-medium hover:from-gold-600 hover:to-gold-700 transition-all shadow-lg shadow-gold-500/25 flex items-center gap-3 mx-auto"
+              className="bg-stone-900 text-white px-8 py-3.5 rounded-lg font-medium hover:bg-stone-800 transition-colors inline-flex items-center gap-2"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Begin Your Journey Today
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
+              Begin Your Journey
+              <ArrowRight size={18} />
+            </motion.button>
+          </motion.div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" className="py-24 px-6 bg-stone-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-96 h-96 bg-gold-400 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-indigo-400 rounded-full blur-3xl" />
-        </div>
-        
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-white/10 text-gold-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <MessageCircle size={16} />
-              <span>Real Stories</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif mb-4">
-              Loved by Believers
-              <br />
-              <span className="text-gold-400">Around the World</span>
+      <section id="testimonials" className="py-16 px-6 bg-stone-900 text-white">
+        <div className="max-w-4xl mx-auto">
+          <motion.div 
+            className="text-center mb-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <p className="text-gold-400 font-medium mb-2 text-sm tracking-wide uppercase">Testimonials</p>
+            <h2 className="text-3xl md:text-4xl font-serif">
+              Loved by Believers Worldwide
             </h2>
-            <p className="text-xl text-stone-400 max-w-2xl mx-auto">
-              Hear from Christians whose spiritual lives have been transformed by Sanctum AI
-            </p>
-          </div>
+          </motion.div>
           
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-10 border border-white/10">
-              <Quote className="text-gold-400 mb-6" size={48} />
-              <p className="text-2xl md:text-3xl font-serif text-white/90 mb-8 leading-relaxed">
-                "{testimonials[activeTestimonial].quote}"
-              </p>
-              <div className="flex items-center gap-4">
-                <img 
-                  src={testimonials[activeTestimonial].avatar} 
-                  alt={testimonials[activeTestimonial].author}
-                  className="w-14 h-14 rounded-full object-cover border-2 border-gold-400"
-                />
-                <div>
-                  <p className="font-semibold text-white">{testimonials[activeTestimonial].author}</p>
-                  <p className="text-white/60">{testimonials[activeTestimonial].role}</p>
-                  <p className="text-white/40 text-sm">{testimonials[activeTestimonial].location}</p>
-                </div>
+          <motion.div 
+            className="bg-stone-800 rounded-lg p-8"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+          >
+            <Quote className="text-stone-700 mb-4" size={32} />
+            <motion.p 
+              key={activeTestimonial}
+              className="text-xl md:text-2xl font-serif text-white/90 mb-6 leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+            >
+              "{testimonials[activeTestimonial].quote}"
+            </motion.p>
+            <motion.div 
+              className="flex items-center gap-3"
+              key={`author-${activeTestimonial}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <img 
+                src={testimonials[activeTestimonial].avatar} 
+                alt={testimonials[activeTestimonial].author}
+                className="w-12 h-12 rounded-full object-cover"
+              />
+              <div>
+                <p className="font-medium text-white">{testimonials[activeTestimonial].author}</p>
+                <p className="text-stone-400 text-sm">{testimonials[activeTestimonial].role}</p>
               </div>
-            </div>
-            
-            <div className="flex justify-center gap-2 mt-8">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveTestimonial(index)}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    index === activeTestimonial ? 'bg-gold-400 w-8' : 'bg-white/30 hover:bg-white/50'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Additional testimonial cards */}
-          <div className="grid md:grid-cols-3 gap-6 mt-16">
-            {testimonials.slice(0, 3).map((testimonial, index) => (
-              <div 
+            </motion.div>
+          </motion.div>
+          
+          <div className="flex justify-center gap-2 mt-6">
+            {testimonials.map((_, index) => (
+              <motion.button
                 key={index}
-                className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <img 
-                    src={testimonial.avatar} 
-                    alt={testimonial.author}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="font-medium text-white text-sm">{testimonial.author}</p>
-                    <p className="text-white/50 text-xs">{testimonial.location}</p>
-                  </div>
-                </div>
-                <p className="text-white/70 text-sm line-clamp-4">"{testimonial.quote}"</p>
-              </div>
+                onClick={() => setActiveTestimonial(index)}
+                className={`h-2 rounded-full transition-all ${
+                  index === activeTestimonial ? 'bg-gold-500 w-6' : 'bg-stone-700 w-2'
+                }`}
+                whileHover={{ scale: 1.2 }}
+              />
             ))}
           </div>
         </div>
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <Award size={16} />
-              <span>Simple Pricing</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif text-stone-900 mb-4">
-              Choose Your Path to
-              <br />
-              <span className="text-gold-600">Spiritual Growth</span>
+      <section id="pricing" className="py-16 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <motion.div 
+            className="text-center mb-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <p className="text-gold-600 font-medium mb-2 text-sm tracking-wide uppercase">Pricing</p>
+            <h2 className="text-3xl md:text-4xl font-serif text-stone-900">
+              Choose Your Path
             </h2>
-            <p className="text-xl text-stone-600 max-w-2xl mx-auto">
-              Start free and upgrade as your faith journey deepens. No hidden fees, cancel anytime.
-            </p>
-          </div>
+          </motion.div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <motion.div 
+            className="grid md:grid-cols-3 gap-6"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+          >
             {pricingPlans.map((plan, index) => (
-              <div 
+              <motion.div 
                 key={index}
-                className={`rounded-2xl p-8 ${
+                className={`rounded-lg p-6 ${
                   plan.highlighted 
-                    ? 'bg-gradient-to-b from-stone-900 to-stone-800 text-white ring-4 ring-gold-400 scale-105' 
-                    : 'bg-white border border-stone-200'
+                    ? 'bg-stone-900 text-white ring-2 ring-gold-500' 
+                    : 'bg-stone-50 border border-stone-200'
                 }`}
+                variants={fadeInUp}
+                whileHover={{ y: -10, boxShadow: plan.highlighted ? "0 25px 50px -12px rgba(0,0,0,0.4)" : "0 20px 40px -20px rgba(0,0,0,0.1)" }}
               >
                 {plan.highlighted && (
-                  <div className="bg-gold-400 text-stone-900 text-sm font-semibold px-4 py-1 rounded-full inline-block mb-4">
+                  <motion.div 
+                    className="bg-gold-500 text-stone-900 text-xs font-semibold px-3 py-1 rounded-full inline-block mb-3"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", delay: 0.3 }}
+                  >
                     Most Popular
-                  </div>
+                  </motion.div>
                 )}
-                <h3 className={`text-xl font-semibold mb-2 ${plan.highlighted ? 'text-white' : 'text-stone-900'}`}>
+                <h3 className={`text-lg font-semibold mb-1 ${plan.highlighted ? 'text-white' : 'text-stone-900'}`}>
                   {plan.name}
                 </h3>
-                <div className="flex items-baseline gap-1 mb-2">
-                  <span className={`text-4xl font-serif ${plan.highlighted ? 'text-white' : 'text-stone-900'}`}>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className={`text-3xl font-serif ${plan.highlighted ? 'text-white' : 'text-stone-900'}`}>
                     {plan.price}
                   </span>
-                  <span className={plan.highlighted ? 'text-white/60' : 'text-stone-500'}>
+                  <span className={plan.highlighted ? 'text-stone-400' : 'text-stone-500'}>
                     {plan.period}
                   </span>
                 </div>
-                <p className={`mb-6 ${plan.highlighted ? 'text-white/70' : 'text-stone-600'}`}>
+                <p className={`text-sm mb-5 ${plan.highlighted ? 'text-stone-400' : 'text-stone-500'}`}>
                   {plan.description}
                 </p>
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-2 mb-6">
                   {plan.features.map((feature, fIndex) => (
-                    <li key={fIndex} className="flex items-center gap-3">
-                      <Check size={18} className={plan.highlighted ? 'text-gold-400' : 'text-emerald-500'} />
-                      <span className={plan.highlighted ? 'text-white/90' : 'text-stone-700'}>{feature}</span>
-                    </li>
+                    <motion.li 
+                      key={fIndex} 
+                      className="flex items-center gap-2 text-sm"
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: fIndex * 0.05 }}
+                    >
+                      <Check size={14} className={plan.highlighted ? 'text-gold-400' : 'text-stone-400'} />
+                      <span className={plan.highlighted ? 'text-stone-300' : 'text-stone-600'}>{feature}</span>
+                    </motion.li>
                   ))}
                 </ul>
-                <button 
+                <motion.button 
                   onClick={() => onChangeView(ViewState.SIGNUP)}
-                  className={`w-full py-3 rounded-xl font-medium transition-all ${
+                  className={`w-full py-2.5 rounded-lg font-medium transition-colors ${
                     plan.highlighted 
-                      ? 'bg-gold-400 text-stone-900 hover:bg-gold-300' 
-                      : 'bg-stone-100 text-stone-800 hover:bg-stone-200'
+                      ? 'bg-gold-500 text-stone-900 hover:bg-gold-400' 
+                      : 'bg-stone-900 text-white hover:bg-stone-800'
                   }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   {plan.cta}
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
             ))}
-          </div>
-
-          <p className="text-center text-stone-500 mt-8">
-            All plans include a 30-day money-back guarantee. No questions asked.
-          </p>
+          </motion.div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-24 px-6 bg-stone-100">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <MessageCircle size={16} />
-              <span>FAQ</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif text-stone-900 mb-4">
-              Frequently Asked
-              <br />
-              <span className="text-gold-600">Questions</span>
+      <section id="faq" className="py-16 px-6 bg-stone-50">
+        <div className="max-w-2xl mx-auto">
+          <motion.div 
+            className="text-center mb-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <p className="text-gold-600 font-medium mb-2 text-sm tracking-wide uppercase">FAQ</p>
+            <h2 className="text-3xl md:text-4xl font-serif text-stone-900">
+              Frequently Asked Questions
             </h2>
-            <p className="text-xl text-stone-600">
-              Everything you need to know about Sanctum AI
-            </p>
-          </div>
+          </motion.div>
           
-          <div className="space-y-4">
+          <motion.div 
+            className="space-y-3"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+          >
             {faqs.map((faq, index) => (
-              <div 
+              <motion.div 
                 key={index}
-                className="bg-white rounded-xl border border-stone-200 overflow-hidden"
+                className="bg-white rounded-lg border border-stone-200 overflow-hidden"
+                variants={fadeInUp}
               >
-                <button
+                <motion.button
                   onClick={() => setActiveFaq(activeFaq === index ? null : index)}
-                  className="w-full flex items-center justify-between p-6 text-left"
+                  className="w-full flex items-center justify-between p-5 text-left"
+                  whileHover={{ backgroundColor: "#fafaf9" }}
                 >
-                  <span className="font-semibold text-stone-900 pr-4">{faq.question}</span>
-                  <ChevronDown 
-                    size={20} 
-                    className={`text-stone-400 transition-transform flex-shrink-0 ${
-                      activeFaq === index ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-                {activeFaq === index && (
-                  <div className="px-6 pb-6">
-                    <p className="text-stone-600 leading-relaxed">{faq.answer}</p>
+                  <span className="font-medium text-stone-900 pr-4">{faq.question}</span>
+                  <motion.div
+                    animate={{ rotate: activeFaq === index ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ChevronDown size={18} className="text-stone-400 flex-shrink-0" />
+                  </motion.div>
+                </motion.button>
+                <motion.div
+                  initial={false}
+                  animate={{ 
+                    height: activeFaq === index ? "auto" : 0,
+                    opacity: activeFaq === index ? 1 : 0
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-5 pb-5">
+                    <p className="text-stone-500 text-sm leading-relaxed">{faq.answer}</p>
                   </div>
-                )}
-              </div>
+                </motion.div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-6 bg-gradient-to-br from-gold-50 via-white to-indigo-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-gold-500/30">
-            <Cross className="text-white" size={40} />
-          </div>
-          <h2 className="text-4xl md:text-5xl font-serif text-stone-900 mb-6">
-            Ready to Transform Your
-            <br />
-            <span className="text-gold-600">Spiritual Life?</span>
-          </h2>
-          <p className="text-xl text-stone-600 mb-10 max-w-2xl mx-auto">
-            Join thousands of believers who are deepening their faith, building prayer habits, 
-            and experiencing God's presence like never before.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button 
-              onClick={() => onChangeView(ViewState.SIGNUP)}
-              className="group bg-gradient-to-r from-stone-800 to-stone-900 text-white px-8 py-4 rounded-xl font-medium hover:from-stone-900 hover:to-black transition-all shadow-xl shadow-stone-900/20 flex items-center gap-3"
-            >
-              Start Your Free Journey
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-          <p className="text-stone-500 text-sm mt-4">No credit card required • Free forever plan available</p>
-          
-          {/* Trust badges */}
-          <div className="flex flex-wrap items-center justify-center gap-8 mt-12 pt-12 border-t border-stone-200">
-            <div className="flex items-center gap-2 text-stone-500">
-              <Shield size={20} />
-              <span className="text-sm">Bank-level Security</span>
-            </div>
-            <div className="flex items-center gap-2 text-stone-500">
-              <Globe size={20} />
-              <span className="text-sm">150+ Countries</span>
-            </div>
-            <div className="flex items-center gap-2 text-stone-500">
-              <Users size={20} />
-              <span className="text-sm">50K+ Believers</span>
-            </div>
-            <div className="flex items-center gap-2 text-stone-500">
-              <Award size={20} />
-              <span className="text-sm">4.9★ Rating</span>
-            </div>
-          </div>
-        </div>
+      <section className="py-16 px-6 bg-white">
+        <motion.div 
+          className="max-w-3xl mx-auto text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+        >
+          <motion.div 
+            className="w-14 h-14 bg-stone-900 rounded-xl flex items-center justify-center mx-auto mb-6"
+            variants={scaleIn}
+            whileHover={{ scale: 1.1, rotate: 5 }}
+          >
+            <Cross className="text-gold-400" size={28} />
+          </motion.div>
+          <motion.h2 
+            className="text-3xl md:text-4xl font-serif text-stone-900 mb-4"
+            variants={fadeInUp}
+          >
+            Ready to Transform Your Spiritual Life?
+          </motion.h2>
+          <motion.p 
+            className="text-stone-500 mb-8 max-w-xl mx-auto"
+            variants={fadeInUp}
+          >
+            Join thousands of believers deepening their faith and experiencing God's presence like never before.
+          </motion.p>
+          <motion.button 
+            onClick={() => onChangeView(ViewState.SIGNUP)}
+            className="bg-stone-900 text-white px-8 py-3.5 rounded-lg font-medium hover:bg-stone-800 transition-colors inline-flex items-center gap-2"
+            variants={fadeInUp}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Start Your Free Journey
+            <ArrowRight size={18} />
+          </motion.button>
+          <motion.p 
+            className="text-stone-400 text-sm mt-4"
+            variants={fadeInUp}
+          >
+            No credit card required
+          </motion.p>
+        </motion.div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-stone-900 text-white py-16 px-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Mobile App Download Section */}
-          <div className="bg-gradient-to-r from-gold-600/20 to-amber-600/20 rounded-2xl p-8 mb-12 border border-gold-500/30">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
+      <footer className="bg-stone-900 text-white py-12 px-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Mobile App Section */}
+          <motion.div 
+            className="bg-stone-800 rounded-lg p-6 mb-10"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="grid md:grid-cols-2 gap-6 items-center">
               <div>
-                <h3 className="text-2xl md:text-3xl font-serif mb-4">
-                  Take Your Faith Journey <span className="text-gold-400">Everywhere</span>
+                <h3 className="text-xl font-serif mb-2">
+                  Take Your Faith Journey Everywhere
                 </h3>
-                <p className="text-stone-400 mb-6">
-                  Download the Sanctum AI mobile app and never miss a moment of spiritual growth. 
-                  Available on iOS and Android.
+                <p className="text-stone-400 text-sm mb-4">
+                  Download the Theolyte mobile app for iOS and Android.
                 </p>
-                <div className="flex flex-wrap gap-4">
-                  {/* App Store Button */}
-                  <a href="#" className="flex items-center gap-3 bg-white text-stone-900 px-5 py-3 rounded-xl hover:bg-stone-100 transition-colors">
-                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                <div className="flex flex-wrap gap-3">
+                  <motion.a 
+                    href="#" 
+                    className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg border border-stone-700"
+                    whileHover={{ scale: 1.05, backgroundColor: "#1c1917" }}
+                  >
+                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
                     </svg>
                     <div className="text-left">
-                      <p className="text-xs text-stone-500">Download on the</p>
-                      <p className="text-sm font-semibold">App Store</p>
+                      <p className="text-[9px] text-stone-400 leading-none">Download on the</p>
+                      <p className="text-sm font-medium leading-tight">App Store</p>
                     </div>
-                  </a>
+                  </motion.a>
                   
-                  {/* Google Play Button */}
-                  <a href="#" className="flex items-center gap-3 bg-white text-stone-900 px-5 py-3 rounded-xl hover:bg-stone-100 transition-colors">
-                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                  <motion.a 
+                    href="#" 
+                    className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg border border-stone-700"
+                    whileHover={{ scale: 1.05, backgroundColor: "#1c1917" }}
+                  >
+                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
                     </svg>
                     <div className="text-left">
-                      <p className="text-xs text-stone-500">Get it on</p>
-                      <p className="text-sm font-semibold">Google Play</p>
+                      <p className="text-[9px] text-stone-400 leading-none">GET IT ON</p>
+                      <p className="text-sm font-medium leading-tight">Google Play</p>
                     </div>
-                  </a>
+                  </motion.a>
                 </div>
               </div>
               
+              {/* Phone Mockup */}
               <div className="hidden md:flex justify-center">
-                <div className="relative">
-                  {/* Phone mockup */}
-                  <div className="w-48 h-96 bg-stone-800 rounded-3xl border-4 border-stone-700 p-2 shadow-2xl">
-                    <div className="w-full h-full bg-gradient-to-br from-stone-900 to-stone-800 rounded-2xl overflow-hidden">
-                      <div className="p-4">
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="w-8 h-8 bg-gradient-to-br from-gold-400 to-gold-600 rounded-lg flex items-center justify-center">
-                            <Cross className="text-white" size={14} />
-                          </div>
-                          <span className="text-white text-sm font-serif">Sanctum</span>
-                        </div>
-                        <div className="bg-white/10 rounded-lg p-3 mb-3">
-                          <p className="text-xs text-gold-400 mb-1">Daily Verse</p>
-                          <p className="text-xs text-white/80 italic">"Trust in the LORD..."</p>
-                        </div>
-                        <div className="bg-gradient-to-br from-gold-500 to-gold-600 rounded-lg p-3 mb-3">
-                          <p className="text-xs text-white font-medium">🔥 21 Day Streak</p>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="bg-white/10 rounded-lg p-2 flex items-center gap-2">
-                            <Heart size={12} className="text-rose-400" />
-                            <span className="text-xs text-white/70">Pray</span>
-                          </div>
-                          <div className="bg-white/10 rounded-lg p-2 flex items-center gap-2">
-                            <BookOpen size={12} className="text-emerald-400" />
-                            <span className="text-xs text-white/70">Read</span>
-                          </div>
-                          <div className="bg-white/10 rounded-lg p-2 flex items-center gap-2">
-                            <Users size={12} className="text-indigo-400" />
-                            <span className="text-xs text-white/70">Community</span>
-                          </div>
-                        </div>
+                <motion.div 
+                  className="w-40 h-80 bg-stone-950 rounded-3xl p-2 border-4 border-stone-700"
+                  initial={{ y: 20, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="w-full h-full bg-stone-900 rounded-2xl overflow-hidden p-3">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-6 h-6 bg-gold-500 rounded-md flex items-center justify-center">
+                        <Cross className="text-white" size={10} />
                       </div>
+                      <span className="text-white text-xs font-serif">Theolyte</span>
+                    </div>
+                    <div className="bg-stone-800 rounded-lg p-2 mb-2">
+                      <p className="text-[8px] text-gold-400">Daily Verse</p>
+                      <p className="text-[9px] text-white/70 italic">"Trust in the LORD..."</p>
+                    </div>
+                    <motion.div 
+                      className="bg-gold-500 rounded-lg p-2 mb-2"
+                      animate={{ scale: [1, 1.02, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <div className="flex items-center gap-1">
+                        <Flame size={10} className="text-white" />
+                        <span className="text-[10px] text-white font-medium">21 Day Streak</span>
+                      </div>
+                    </motion.div>
+                    <div className="space-y-1">
+                      {['Pray', 'Read', 'Community'].map((item) => (
+                        <div key={item} className="bg-stone-800 rounded p-1.5 flex items-center gap-1">
+                          <div className="w-3 h-3 bg-stone-700 rounded" />
+                          <span className="text-[9px] text-stone-400">{item}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  {/* Decorative glow */}
-                  <div className="absolute -inset-4 bg-gold-500/20 rounded-full blur-2xl -z-10" />
-                </div>
+                </motion.div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="grid md:grid-cols-5 gap-12 mb-12">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center">
-                  <Cross className="text-white" size={20} />
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-gold-500 rounded-lg flex items-center justify-center">
+                  <Cross className="text-white" size={16} />
                 </div>
-                <span className="text-xl font-serif font-semibold">Sanctum AI</span>
+                <span className="font-serif font-semibold">Theolyte</span>
               </div>
-              <p className="text-stone-400 text-sm leading-relaxed mb-6">
-                Empowering believers worldwide to deepen their faith through technology and community. 
-                Your spiritual growth journey starts here.
+              <p className="text-stone-400 text-sm">
+                Empowering believers to deepen their faith through technology and community.
               </p>
-              <div className="flex items-center gap-4">
-                <a href="#" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <Globe size={18} />
-                </a>
-                <a href="#" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <Smartphone size={18} />
-                </a>
+            </div>
+            
+            {[
+              { title: 'Product', links: ['Features', 'Pricing', 'iOS App', 'Android App'] },
+              { title: 'Resources', links: ['Blog', 'Devotionals', 'Prayer Guides', 'Help Center'] },
+              { title: 'Company', links: ['About Us', 'Privacy Policy', 'Terms of Service'] }
+            ].map((section) => (
+              <div key={section.title}>
+                <h4 className="font-medium mb-3 text-sm">{section.title}</h4>
+                <ul className="space-y-2 text-stone-400 text-sm">
+                  {section.links.map((link) => (
+                    <li key={link}>
+                      <motion.a 
+                        href="#" 
+                        className="hover:text-white transition-colors"
+                        whileHover={{ x: 4 }}
+                      >
+                        {link}
+                      </motion.a>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-stone-400">
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">iOS App</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Android App</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">API</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-stone-400">
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Devotionals</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Prayer Guides</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Community</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-stone-400">
-                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Our Mission</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-              </ul>
-            </div>
+            ))}
           </div>
           
-          <div className="border-t border-stone-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="border-t border-stone-800 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-stone-500 text-sm">
-              © 2024 Sanctum AI. All rights reserved. Made with ❤️ for the glory of God.
+              © 2024 Theolyte. All rights reserved.
             </p>
             <p className="text-stone-600 text-sm italic">
               "Draw near to God, and He will draw near to you." — James 4:8

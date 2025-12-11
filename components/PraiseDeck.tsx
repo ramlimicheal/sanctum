@@ -176,13 +176,13 @@ const PraiseDeck: React.FC = () => {
   // --- VIEW: VOLUMES (1-100, 101-200...) ---
   if (view === 'volumes') {
     return (
-      <div className="max-w-6xl mx-auto p-6 md:p-10 pb-24 animate-fade-in">
-        <div className="text-center mb-12">
-           <h2 className="text-4xl font-serif text-stone-900 mb-3">The 1000 Praises</h2>
-           <p className="text-stone-500">Select a Volume to begin your ascent.</p>
-           <p className="text-gold-600 text-sm mt-2 font-medium">{completedPraises.length} / 1000 Praises Completed</p>
+      <div className="max-w-6xl mx-auto p-4 md:p-6 lg:p-10 pb-24 animate-fade-in">
+        <div className="text-center mb-8 md:mb-12">
+           <h2 className="text-2xl md:text-4xl font-serif text-stone-900 mb-2 md:mb-3">The 1000 Praises</h2>
+           <p className="text-stone-500 text-sm md:text-base">Select a Volume to begin your ascent.</p>
+           <p className="text-gold-600 text-xs md:text-sm mt-2 font-medium">{completedPraises.length} / 1000 Praises Completed</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
            {[...Array(totalVolumes)].map((_, i) => {
              const start = i * 100 + 1;
              const end = (i + 1) * 100;
