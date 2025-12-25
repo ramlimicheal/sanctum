@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, CheckCircle2, RefreshCw, Sparkles, BookOpen, Copy, Download, Check } from 'lucide-react';
 import { ACTSStep } from '@/types';
 import { generateACTSPrompts, synthesizePrayerSession } from '@/services/geminiService';
-import { savePrayerSession, updatePrayerStreak } from '@/services/storageService';
+import { savePrayerSession, updatePrayerStreak } from '@/services/supabaseStorage';
 
 const steps = [ACTSStep.ADORATION, ACTSStep.CONFESSION, ACTSStep.THANKSGIVING, ACTSStep.SUPPLICATION];
 
@@ -48,18 +48,22 @@ const PrayerArchitect: React.FC = () => {
     const synthesis = await synthesizePrayerSession(userInputs);
     setSynthesizedPrayer(synthesis);
     setIsSynthesizing(false);
-    
-    // Save prayer session for analytics
-    const endTime = new Date();
-    const durationMinutes = Math.round((endTime.getTime() - startTimeRef.current.getTime()) / 60000);
-    savePrayerSession({
-      date: new Date().toISOString().split('T')[0],
-      durationMinutes: Math.max(durationMinutes, 1), // At least 1 minute
-      focus: 'ACTS Prayer'
-    });
-    
-    // Update prayer streak
-    updatePrayerStreak();
+
+    try {
+      // Save prayer session for analytics
+      const endTime = new Date();
+      const durationMinutes = Math.round((endTime.getTime() - startTimeRef.current.getTime()) / 60000);
+      await savePrayerSession({
+        date: new Date().toISOString().split('T')[0],
+        durationMinutes: Math.max(durationMinutes, 1),
+        focus: 'ACTS Prayer'
+      });
+
+      // Update prayer streak
+      await updatePrayerStreak();
+    } catch (error) {
+      console.error('Error saving prayer session:', error);
+    }
   }
 
   const copyToClipboard = () => {

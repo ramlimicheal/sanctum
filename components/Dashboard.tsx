@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'rechar
 import { Sun, Moon, ArrowRight, Quote, Users, Mail, Clock, Bell, BookOpen, RefreshCw, Flame, Star, Utensils, TrendingUp } from 'lucide-react';
 import { ViewState } from '@/types';
 import { getDailyVerse, getRandomVerse } from '@/services/dailyVerseService';
-import { getWeeklyPrayerStats, getTotalWeeklyMinutes, getPrayerLetters, getIntercessionItems, getUserPreferences, getPrayerStreak, getTestimonies, getActiveFast, getDevotionalProgress } from '@/services/storageService';
+import { getWeeklyPrayerStats, getTotalWeeklyMinutes, getPrayerLetters, getIntercessionItems, getUserPreferences, getPrayerStreak, getTestimonies, getActiveFast, getDevotionalProgress } from '@/services/supabaseStorage';
 import { DEVOTIONAL_PLANS } from '@/services/devotionalPlans';
 
 interface DashboardProps {
@@ -11,55 +11,87 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
+  const [loading, setLoading] = useState(true);
   const [timeOfDay, setTimeOfDay] = useState<'morning' | 'afternoon' | 'evening'>('morning');
   const [nextPrayerTime, setNextPrayerTime] = useState<string>('');
   const [dailyVerse, setDailyVerse] = useState(getDailyVerse());
-  const [weeklyData, setWeeklyData] = useState(getWeeklyPrayerStats());
-  const [totalMinutes, setTotalMinutes] = useState(getTotalWeeklyMinutes());
+  const [weeklyData, setWeeklyData] = useState<{ name: string; minutes: number }[]>([]);
+  const [totalMinutes, setTotalMinutes] = useState(0);
   const [letterCount, setLetterCount] = useState(0);
   const [intercessionCount, setIntercessionCount] = useState(0);
   const [userName, setUserName] = useState('Pilgrim');
-  const [streak, setStreak] = useState(getPrayerStreak());
+  const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, lastPrayerDate: null, totalPrayerDays: 0, milestones: [] });
   const [testimoniesCount, setTestimoniesCount] = useState(0);
-  const [activeFast, setActiveFast] = useState(getActiveFast());
+  const [activeFast, setActiveFast] = useState<any>(null);
   const [activeDevotional, setActiveDevotional] = useState<{ title: string; day: number; total: number } | null>(null);
 
   useEffect(() => {
-    const hour = new Date().getHours();
-    const prefs = getUserPreferences();
-    setUserName(prefs.name);
-    
-    if (hour < 12) {
-      setTimeOfDay('morning');
-      setNextPrayerTime('12:00 PM (Midday)');
-    } else if (hour < 18) {
-      setTimeOfDay('afternoon');
-      setNextPrayerTime('6:00 PM (Vespers)');
-    } else {
-      setTimeOfDay('evening');
-      setNextPrayerTime('9:00 PM (Compline)');
-    }
+    const loadData = async () => {
+      try {
+        const hour = new Date().getHours();
 
-    // Load real data
-    setWeeklyData(getWeeklyPrayerStats());
-    setTotalMinutes(getTotalWeeklyMinutes());
-    setLetterCount(getPrayerLetters().length);
-    setIntercessionCount(getIntercessionItems().filter(i => !i.lastPrayed || 
-      (new Date().getTime() - new Date(i.lastPrayed).getTime()) > 86400000 * 3
-    ).length);
-    setStreak(getPrayerStreak());
-    setTestimoniesCount(getTestimonies().length);
-    setActiveFast(getActiveFast());
-    
-    // Check for active devotional
-    const devProgress = getDevotionalProgress();
-    const activeProgress = devProgress.find(p => !p.isCompleted);
-    if (activeProgress) {
-      const plan = DEVOTIONAL_PLANS.find(p => p.id === activeProgress.planId);
-      if (plan) {
-        setActiveDevotional({ title: plan.title, day: activeProgress.currentDay, total: plan.duration });
+        if (hour < 12) {
+          setTimeOfDay('morning');
+          setNextPrayerTime('12:00 PM (Midday)');
+        } else if (hour < 18) {
+          setTimeOfDay('afternoon');
+          setNextPrayerTime('6:00 PM (Vespers)');
+        } else {
+          setTimeOfDay('evening');
+          setNextPrayerTime('9:00 PM (Compline)');
+        }
+
+        const [
+          prefs,
+          weeklyStats,
+          totalMins,
+          letters,
+          intercessions,
+          streakData,
+          testimonies,
+          fast,
+          devProgress
+        ] = await Promise.all([
+          getUserPreferences(),
+          getWeeklyPrayerStats(),
+          getTotalWeeklyMinutes(),
+          getPrayerLetters(),
+          getIntercessionItems(),
+          getPrayerStreak(),
+          getTestimonies(),
+          getActiveFast(),
+          getDevotionalProgress()
+        ]);
+
+        setUserName(prefs.name);
+        setWeeklyData(weeklyStats);
+        setTotalMinutes(totalMins);
+        setLetterCount(letters.length);
+
+        const activeIntercessions = intercessions.filter(i => !i.lastPrayed ||
+          (new Date().getTime() - new Date(i.lastPrayed).getTime()) > 86400000 * 3
+        );
+        setIntercessionCount(activeIntercessions.length);
+
+        setStreak(streakData);
+        setTestimoniesCount(testimonies.length);
+        setActiveFast(fast);
+
+        const activeProgress = devProgress.find(p => !p.isCompleted);
+        if (activeProgress) {
+          const plan = DEVOTIONAL_PLANS.find(p => p.id === activeProgress.planId);
+          if (plan) {
+            setActiveDevotional({ title: plan.title, day: activeProgress.currentDay, total: plan.duration });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    loadData();
   }, []);
 
   const refreshVerse = () => {
@@ -93,6 +125,19 @@ const Dashboard: React.FC<DashboardProps> = ({ onChangeView }) => {
     if (streak.currentStreak >= 3) return "Keep going!";
     return "Start your streak today!";
   };
+
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6 lg:p-10 max-w-6xl mx-auto flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <Flame className="text-white" size={32} />
+          </div>
+          <p className="text-stone-600 font-serif">Loading your sanctuary...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 lg:p-10 max-w-6xl mx-auto space-y-6 md:space-y-8 animate-fade-in pb-24 relative z-10">

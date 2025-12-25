@@ -1,50 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Bell, Download, Trash2, Save, Check, AlertTriangle, X, Flame, Clock, Trophy, LogOut } from 'lucide-react';
-import { getUserPreferences, saveUserPreferences, exportAllData, clearAllData, UserPreferences, getPrayerStreak, getPrayerReminders, savePrayerReminders, toggleReminder } from '@/services/storageService';
-import { PrayerReminder } from '@/types';
+import { Settings as SettingsIcon, User, Bell, Save, Check, Flame, Clock, Trophy, LogOut } from 'lucide-react';
+import { getUserPreferences, saveUserPreferences, UserPreferences, getPrayerStreak } from '@/services/supabaseStorage';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Settings: React.FC = () => {
   const { signOut } = useAuth();
-  const [preferences, setPreferences] = useState<UserPreferences>(getUserPreferences());
+  const [loading, setLoading] = useState(true);
+  const [preferences, setPreferences] = useState<UserPreferences>({
+    name: 'Pilgrim',
+    morningPrayerTime: '08:00',
+    eveningPrayerTime: '21:00',
+    notificationsEnabled: false,
+    theme: 'light'
+  });
   const [saved, setSaved] = useState(false);
-  const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [cleared, setCleared] = useState(false);
-  const [streak, setStreak] = useState(getPrayerStreak());
-  const [reminders, setReminders] = useState<PrayerReminder[]>(getPrayerReminders());
+  const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, lastPrayerDate: null, totalPrayerDays: 0, milestones: [] });
 
-  const handleSave = () => {
-    saveUserPreferences(preferences);
-    savePrayerReminders(reminders);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [prefs, streakData] = await Promise.all([
+          getUserPreferences(),
+          getPrayerStreak()
+        ]);
+        setPreferences(prefs);
+        setStreak(streakData);
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
-  const handleToggleReminder = (id: string) => {
-    const updated = reminders.map(r => r.id === id ? { ...r, isEnabled: !r.isEnabled } : r);
-    setReminders(updated);
-  };
-
-  const handleExport = () => {
-    const data = exportAllData();
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `theolyte-backup-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleClearData = () => {
-    clearAllData();
-    setShowClearConfirm(false);
-    setCleared(true);
-    setPreferences(getUserPreferences());
-    setStreak(getPrayerStreak());
-    setTimeout(() => setCleared(false), 3000);
+  const handleSave = async () => {
+    try {
+      await saveUserPreferences(preferences);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+    }
   };
 
   const getMilestoneProgress = () => {
@@ -57,6 +54,19 @@ const Settings: React.FC = () => {
   };
 
   const { nextMilestone, progress } = getMilestoneProgress();
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto p-4 md:p-6 lg:p-10 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <SettingsIcon className="text-white" size={32} />
+          </div>
+          <p className="text-stone-600 font-serif">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-4 md:p-6 lg:p-10 pb-24 animate-fade-in">
@@ -234,34 +244,6 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        {/* Data Management Section */}
-        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-          <div className="bg-stone-50 px-6 py-4 border-b border-stone-200">
-            <h3 className="font-semibold text-stone-800 flex items-center gap-2">
-              <Download size={18} /> Data Management
-            </h3>
-          </div>
-          <div className="p-6 space-y-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <button
-                onClick={handleExport}
-                className="flex-1 flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 text-stone-700 px-4 py-3 rounded-lg transition-colors"
-              >
-                <Download size={18} /> Export All Data
-              </button>
-              <button
-                onClick={() => setShowClearConfirm(true)}
-                className="flex-1 flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-4 py-3 rounded-lg transition-colors"
-              >
-                <Trash2 size={18} /> Clear All Data
-              </button>
-            </div>
-            <p className="text-xs text-stone-400">
-              Export your data for backup or clear all stored data to start fresh.
-            </p>
-          </div>
-        </div>
-
         {/* Account Section */}
         <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
           <div className="bg-stone-50 px-6 py-4 border-b border-stone-200">
@@ -291,41 +273,6 @@ const Settings: React.FC = () => {
         </button>
       </div>
 
-      {/* Clear Data Confirmation Modal */}
-      {showClearConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl animate-slide-up">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-500">
-                <AlertTriangle size={24} />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-stone-900">Clear All Data?</h3>
-                <p className="text-sm text-stone-500">This action cannot be undone.</p>
-              </div>
-            </div>
-            
-            <p className="text-stone-600 mb-6">
-              This will permanently delete all your prayer letters, intercession requests, vision cards, and other saved data. Consider exporting your data first.
-            </p>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowClearConfirm(false)}
-                className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 py-3 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleClearData}
-                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg transition-colors"
-              >
-                Clear Everything
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
