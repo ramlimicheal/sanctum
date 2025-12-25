@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, CheckCircle2, RefreshCw, Sparkles, BookOpen, Copy, Download, Check } from 'lucide-react';
 import { ACTSStep } from '@/types';
-import { generateACTSPrompts, synthesizePrayerSession } from '@/services/geminiService';
+import { generateACTSPrompts, synthesizePrayerSession } from '@/services/megallmService';
 import { savePrayerSession, updatePrayerStreak } from '@/services/supabaseStorage';
 
 const steps = [ACTSStep.ADORATION, ACTSStep.CONFESSION, ACTSStep.THANKSGIVING, ACTSStep.SUPPLICATION];

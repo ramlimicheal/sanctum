@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Target, Plus, Trash2, Loader2 } from 'lucide-react';
-import { analyzePurposeAlignment } from '@/services/geminiService';
+import { analyzePurposeAlignment } from '@/services/megallmService';
 import { AlignmentResult } from '@/types';
 import { getCallings, saveCallings, getTasks, saveTasks } from '@/services/storageService';
 

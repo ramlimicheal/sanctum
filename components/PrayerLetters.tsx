@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, PenLine, Lock, Unlock, Calendar, Sparkles, Send, CheckCircle2, ChevronLeft, Loader2, Bookmark, Copy, Check } from 'lucide-react';
 import { PrayerLetter, ScriptureWeaveResult } from '@/types';
-import { weaveScripture } from '@/services/geminiService';
-import { getPrayerLetters, savePrayerLetters } from '@/services/storageService';
+import { weaveScripture } from '@/services/megallmService';
+import { getPrayerLetters, addPrayerLetter, updatePrayerLetter } from '@/services/supabaseStorage';
 
 const PrayerLetters: React.FC = () => {
   const [view, setView] = useState<'list' | 'write' | 'read'>('list');
   const [letters, setLetters] = useState<PrayerLetter[]>([]);
   const [selectedLetter, setSelectedLetter] = useState<PrayerLetter | null>(null);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Writer State
   const [newTitle, setNewTitle] = useState('');
@@ -17,45 +18,19 @@ const PrayerLetters: React.FC = () => {
   const [isWeaving, setIsWeaving] = useState(false);
   const [scriptureSeal, setScriptureSeal] = useState<ScriptureWeaveResult | null>(null);
 
-  // Load letters from storage on mount
   useEffect(() => {
-    const storedLetters = getPrayerLetters();
-    if (storedLetters.length > 0) {
-      setLetters(storedLetters);
-    } else {
-      // Set default mock data for first-time users
-      const mockLetters: PrayerLetter[] = [
-        {
-          id: '1',
-          title: 'Anxiety about the move',
-          content: 'Lord, I am terrified of this new city. I feel alone...',
-          createdAt: new Date(Date.now() - 86400000 * 5),
-          unlockDate: new Date(Date.now() - 86400000 * 1),
-          isAnswered: true,
-          status: 'opened',
-          scriptureSeal: { verseText: "Be strong and courageous.", reference: "Joshua 1:9", prayer: "Lord, grant me courage." }
-        },
-        {
-          id: '2',
-          title: 'Waiting for a spouse',
-          content: 'It is hard to be patient. I feel like time is running out...',
-          createdAt: new Date(),
-          unlockDate: new Date(Date.now() + 86400000 * 30),
-          isAnswered: false,
-          status: 'sealed'
-        }
-      ];
-      setLetters(mockLetters);
-      savePrayerLetters(mockLetters);
-    }
+    const loadLetters = async () => {
+      try {
+        const storedLetters = await getPrayerLetters();
+        setLetters(storedLetters);
+      } catch (error) {
+        console.error('Error loading prayer letters:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadLetters();
   }, []);
-
-  // Save letters whenever they change
-  useEffect(() => {
-    if (letters.length > 0) {
-      savePrayerLetters(letters);
-    }
-  }, [letters]);
 
   const handleOpenWrite = () => {
     setNewTitle('');
@@ -73,26 +48,31 @@ const PrayerLetters: React.FC = () => {
     setIsWeaving(false);
   };
 
-  const handleSealAndSend = () => {
+  const handleSealAndSend = async () => {
     if (!newTitle || !newContent) return;
 
-    const unlockDate = unlockDays > 0 
-      ? new Date(Date.now() + (unlockDays * 24 * 60 * 60 * 1000)) 
-      : null;
+    try {
+      const unlockDate = unlockDays > 0
+        ? new Date(Date.now() + (unlockDays * 24 * 60 * 60 * 1000))
+        : null;
 
-    const newLetter: PrayerLetter = {
-      id: Date.now().toString(),
-      title: newTitle,
-      content: newContent,
-      createdAt: new Date(),
-      unlockDate: unlockDate,
-      isAnswered: false,
-      scriptureSeal: scriptureSeal || undefined,
-      status: unlockDate ? 'sealed' : 'opened'
-    };
+      const newLetter: PrayerLetter = {
+        id: Date.now().toString(),
+        title: newTitle,
+        content: newContent,
+        createdAt: new Date(),
+        unlockDate: unlockDate,
+        isAnswered: false,
+        scriptureSeal: scriptureSeal || undefined,
+        status: unlockDate ? 'sealed' : 'opened'
+      };
 
-    setLetters([newLetter, ...letters]);
-    setView('list');
+      await addPrayerLetter(newLetter);
+      setLetters([newLetter, ...letters]);
+      setView('list');
+    } catch (error) {
+      console.error('Error saving prayer letter:', error);
+    }
   };
 
   const handleRead = (letter: PrayerLetter) => {
@@ -109,10 +89,18 @@ const PrayerLetters: React.FC = () => {
     setView('read');
   };
 
-  const markAnswered = (id: string) => {
-    setLetters(letters.map(l => l.id === id ? { ...l, isAnswered: !l.isAnswered } : l));
-    if (selectedLetter && selectedLetter.id === id) {
-      setSelectedLetter({ ...selectedLetter, isAnswered: !selectedLetter.isAnswered });
+  const markAnswered = async (id: string) => {
+    try {
+      const letter = letters.find(l => l.id === id);
+      if (letter) {
+        await updatePrayerLetter(id, { isAnswered: !letter.isAnswered });
+        setLetters(letters.map(l => l.id === id ? { ...l, isAnswered: !l.isAnswered } : l));
+        if (selectedLetter && selectedLetter.id === id) {
+          setSelectedLetter({ ...selectedLetter, isAnswered: !selectedLetter.isAnswered });
+        }
+      }
+    } catch (error) {
+      console.error('Error marking letter as answered:', error);
     }
   };
 
@@ -121,6 +109,14 @@ const PrayerLetters: React.FC = () => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (loading && view === 'list') {
+    return (
+      <div className="max-w-6xl mx-auto p-6 md:p-10 h-full flex items-center justify-center">
+        <Loader2 className="animate-spin text-gold-600" size={48} />
+      </div>
+    );
+  }
 
   // --- WRITE VIEW ---
   if (view === 'write') {

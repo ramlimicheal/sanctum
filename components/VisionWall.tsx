@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Loader2, X } from 'lucide-react';
 import { VisionCard } from '@/types';
-import { generateVisionBoard } from '@/services/geminiService';
-import { getVisionCards, saveVisionCards } from '@/services/storageService';
+import { generateVisionBoard } from '@/services/megallmService';
+import { getVisionCards, addVisionCard, deleteVisionCard } from '@/services/supabaseStorage';
 
 // Helper to get a high quality image URL based on keyword
 const getImageUrl = (keyword: string, id: string) => {
@@ -15,58 +15,54 @@ const VisionWall: React.FC = () => {
   const [cards, setCards] = useState<VisionCard[]>([]);
   const [newFocus, setNewFocus] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Load cards from storage on mount
   useEffect(() => {
-    const storedCards = getVisionCards();
-    if (storedCards.length > 0) {
-      setCards(storedCards);
-    } else {
-      // Set default mock data for first-time users
-      const mockCards: VisionCard[] = [
-        {
-          id: '1',
-          focus: 'Peace',
-          visualKeyword: 'calm lake sunrise',
-          affirmation: 'I am guarded by the peace that surpasses understanding.',
-          scripture: 'Peace I leave with you; my peace I give to you.',
-          reference: 'John 14:27'
-        },
-        {
-          id: '2',
-          focus: 'Strength',
-          visualKeyword: 'high mountain peak',
-          affirmation: 'I can do all things through Christ who strengthens me.',
-          scripture: 'The Lord is my rock and my fortress.',
-          reference: 'Psalm 18:2'
-        }
-      ];
-      setCards(mockCards);
-      saveVisionCards(mockCards);
-    }
+    const loadCards = async () => {
+      try {
+        const storedCards = await getVisionCards();
+        setCards(storedCards);
+      } catch (error) {
+        console.error('Error loading vision cards:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCards();
   }, []);
-
-  // Save cards whenever they change
-  useEffect(() => {
-    if (cards.length > 0) {
-      saveVisionCards(cards);
-    }
-  }, [cards]);
 
   const handleAdd = async () => {
     if (!newFocus.trim()) return;
     setIsGenerating(true);
-    const card = await generateVisionBoard(newFocus);
-    if (card) {
-      setCards([card, ...cards]);
-      setNewFocus('');
+    try {
+      const card = await generateVisionBoard(newFocus);
+      if (card) {
+        await addVisionCard(card);
+        setCards([card, ...cards]);
+        setNewFocus('');
+      }
+    } catch (error) {
+      console.error('Error adding vision card:', error);
     }
     setIsGenerating(false);
   };
 
-  const removeCard = (id: string) => {
-    setCards(cards.filter(c => c.id !== id));
+  const removeCard = async (id: string) => {
+    try {
+      await deleteVisionCard(id);
+      setCards(cards.filter(c => c.id !== id));
+    } catch (error) {
+      console.error('Error removing vision card:', error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-10 pb-24 h-full flex items-center justify-center">
+        <Loader2 className="animate-spin text-gold-600" size={48} />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-10 pb-24 h-full animate-fade-in">

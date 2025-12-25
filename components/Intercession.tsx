@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Heart, Clock, Sparkles, Loader2, X, AlertCircle, Maximize2, Trash2 } from 'lucide-react';
 import { IntercessionItem } from '@/types';
-import { generateIntercessionPrayer } from '@/services/geminiService';
-import { getIntercessionItems, saveIntercessionItems } from '@/services/storageService';
+import { generateIntercessionPrayer } from '@/services/megallmService';
+import { getIntercessionItems, addIntercessionItem, updateIntercessionItem, deleteIntercessionItem } from '@/services/supabaseStorage';
 
 const Intercession: React.FC = () => {
   const [items, setItems] = useState<IntercessionItem[]>([]);
@@ -11,46 +11,48 @@ const Intercession: React.FC = () => {
   const [generatedPrayer, setGeneratedPrayer] = useState<{id: string, text: string} | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [focusModeItem, setFocusModeItem] = useState<IntercessionItem | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load items from storage on mount
   useEffect(() => {
-    const storedItems = getIntercessionItems();
-    if (storedItems.length > 0) {
-      setItems(storedItems);
-    } else {
-      // Set default mock data for first-time users
-      const mockData: IntercessionItem[] = [
-        { id: '1', name: 'Sarah Miller', request: 'Healing for her mother after surgery.', lastPrayed: new Date(Date.now() - 86400000 * 2), category: 'Health' },
-        { id: '2', name: 'Pastor John', request: 'Wisdom for the upcoming sermon series.', lastPrayed: new Date(Date.now() - 86400000 * 5), category: 'Guidance' },
-      ];
-      setItems(mockData);
-      saveIntercessionItems(mockData);
-    }
+    const loadItems = async () => {
+      try {
+        const storedItems = await getIntercessionItems();
+        setItems(storedItems);
+      } catch (error) {
+        console.error('Error loading intercession items:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadItems();
   }, []);
 
-  // Save items whenever they change
-  useEffect(() => {
-    if (items.length > 0) {
-      saveIntercessionItems(items);
-    }
-  }, [items]);
-
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!newItem.name || !newItem.request) return;
-    const item: IntercessionItem = {
-      id: Date.now().toString(),
-      name: newItem.name,
-      request: newItem.request,
-      lastPrayed: null,
-      category: newItem.category
-    };
-    setItems([item, ...items]);
-    setNewItem({ name: '', request: '', category: 'General' });
-    setIsAdding(false);
+    try {
+      const item: IntercessionItem = {
+        id: Date.now().toString(),
+        name: newItem.name,
+        request: newItem.request,
+        lastPrayed: null,
+        category: newItem.category
+      };
+      await addIntercessionItem(item);
+      setItems([item, ...items]);
+      setNewItem({ name: '', request: '', category: 'General' });
+      setIsAdding(false);
+    } catch (error) {
+      console.error('Error adding intercession item:', error);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setItems(items.filter(i => i.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteIntercessionItem(id);
+      setItems(items.filter(i => i.id !== id));
+    } catch (error) {
+      console.error('Error deleting intercession item:', error);
+    }
   };
 
   const generatePrayer = async (item: IntercessionItem) => {
@@ -61,11 +63,27 @@ const Intercession: React.FC = () => {
     setLoadingId(null);
   };
 
-  const markPrayed = (id: string) => {
-    setItems(items.map(i => i.id === id ? { ...i, lastPrayed: new Date() } : i));
-    setGeneratedPrayer(null);
-    if (focusModeItem?.id === id) setFocusModeItem(null);
+  const markPrayed = async (id: string) => {
+    try {
+      const updatedItem = items.find(i => i.id === id);
+      if (updatedItem) {
+        await updateIntercessionItem(id, { lastPrayed: new Date() });
+        setItems(items.map(i => i.id === id ? { ...i, lastPrayed: new Date() } : i));
+      }
+      setGeneratedPrayer(null);
+      if (focusModeItem?.id === id) setFocusModeItem(null);
+    } catch (error) {
+      console.error('Error marking prayer as prayed:', error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto p-4 md:p-6 lg:p-10 pb-24 flex items-center justify-center min-h-screen">
+        <Loader2 className="animate-spin text-gold-600" size={48} />
+      </div>
+    );
+  }
 
   // Focus Mode Overlay
   if (focusModeItem) {

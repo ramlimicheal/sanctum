@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HeartHandshake, Heart, MessageCircle, AlertTriangle, Loader2, Feather, Check, Sparkles } from 'lucide-react';
-import { reframeConflict } from '@/services/geminiService';
+import { reframeConflict } from '@/services/megallmService';
 import { PeaceResponse } from '@/types';
 import { getLoveNotes, saveLoveNotes } from '@/services/storageService';
 

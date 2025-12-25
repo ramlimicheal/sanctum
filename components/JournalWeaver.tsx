@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Feather, Wand2, Loader2, Bookmark, Save, Trash2, Clock } from 'lucide-react';
-import { weaveScripture } from '@/services/geminiService';
+import { weaveScripture } from '@/services/megallmService';
 import { ScriptureWeaveResult } from '@/types';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 

@@ -86,12 +86,6 @@ const Settings: React.FC = () => {
         </div>
       )}
 
-      {cleared && (
-        <div className="mb-6 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg flex items-center gap-2 animate-slide-down">
-          <Check size={18} /> All data has been cleared. Starting fresh!
-        </div>
-      )}
-
       <div className="space-y-8">
         {/* Prayer Streak Section */}
         <div className="bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl shadow-lg overflow-hidden text-white">
@@ -169,44 +163,6 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        {/* Prayer Times Section */}
-        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-          <div className="bg-stone-50 px-6 py-4 border-b border-stone-200">
-            <h3 className="font-semibold text-stone-800 flex items-center gap-2">
-              <Bell size={18} /> Prayer Reminders
-            </h3>
-          </div>
-          <div className="p-6 space-y-4">
-            {reminders.map(reminder => (
-              <div key={reminder.id} className="flex items-center justify-between p-4 bg-stone-50 rounded-lg">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    reminder.isEnabled ? 'bg-amber-100 text-amber-600' : 'bg-stone-200 text-stone-400'
-                  }`}>
-                    <Bell size={18} />
-                  </div>
-                  <div>
-                    <p className="font-medium text-stone-800">{reminder.label}</p>
-                    <p className="text-sm text-stone-500">{reminder.time}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleToggleReminder(reminder.id)}
-                  className={`relative w-12 h-6 rounded-full transition-colors ${
-                    reminder.isEnabled ? 'bg-amber-500' : 'bg-stone-300'
-                  }`}
-                >
-                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                    reminder.isEnabled ? 'left-7' : 'left-1'
-                  }`} />
-                </button>
-              </div>
-            ))}
-            <p className="text-xs text-stone-400">
-              Note: Browser notifications require permission. Click "Allow" when prompted.
-            </p>
-          </div>
-        </div>
 
         {/* Prayer Schedule Section */}
         <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">

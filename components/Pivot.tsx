@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Shield, AlertTriangle, CheckCircle, Zap, Loader2, Edit, Play, Brain, Target } from 'lucide-react';
-import { generatePivotStrategy } from '@/services/geminiService';
+import { generatePivotStrategy } from '@/services/megallmService';
 import { PivotStrategy } from '@/types';
 import { getPivotStrategies, savePivotStrategies } from '@/services/storageService';
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Mic, StopCircle, Sparkles, Activity, BookOpen, Loader2, PlayCircle, AlertCircle, X } from 'lucide-react';
-import { analyzeReflection } from '@/services/geminiService';
+import { analyzeReflection } from '@/services/megallmService';
 import { SpiritualPrescription } from '@/types';
 
 const ReflectionSanctuary: React.FC = () => {
