@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
-import { 
-  Cross, 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  ArrowRight, 
+import {
+  Cross,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
   Sparkles,
   Chrome,
   Apple
 } from 'lucide-react';
 import { ViewState } from '@/types';
 import ParticleBackground from './ParticleBackground';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SignInProps {
   onChangeView: (view: ViewState) => void;
 }
 
 const SignIn: React.FC<SignInProps> = ({ onChangeView }) => {
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,21 +31,24 @@ const SignIn: React.FC<SignInProps> = ({ onChangeView }) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-    
-    // Simulate authentication
-    setTimeout(() => {
+
+    try {
+      const { error: signInError } = await signIn(email, password);
+
+      if (signInError) {
+        setError(signInError.message || 'Failed to sign in. Please check your credentials.');
+        setIsLoading(false);
+      } else {
+        onChangeView(ViewState.DASHBOARD);
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
-      // For demo, just navigate to dashboard
-      onChangeView(ViewState.DASHBOARD);
-    }, 1500);
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      onChangeView(ViewState.DASHBOARD);
-    }, 1500);
+    setError('Social login will be available soon. Please use email/password for now.');
   };
 
   return (

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Bell, Download, Trash2, Save, Check, AlertTriangle, X, Flame, Clock, Trophy } from 'lucide-react';
+import { Settings as SettingsIcon, User, Bell, Download, Trash2, Save, Check, AlertTriangle, X, Flame, Clock, Trophy, LogOut } from 'lucide-react';
 import { getUserPreferences, saveUserPreferences, exportAllData, clearAllData, UserPreferences, getPrayerStreak, getPrayerReminders, savePrayerReminders, toggleReminder } from '@/services/storageService';
 import { PrayerReminder } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Settings: React.FC = () => {
+  const { signOut } = useAuth();
   const [preferences, setPreferences] = useState<UserPreferences>(getUserPreferences());
   const [saved, setSaved] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -256,6 +258,26 @@ const Settings: React.FC = () => {
             </div>
             <p className="text-xs text-stone-400">
               Export your data for backup or clear all stored data to start fresh.
+            </p>
+          </div>
+        </div>
+
+        {/* Account Section */}
+        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+          <div className="bg-stone-50 px-6 py-4 border-b border-stone-200">
+            <h3 className="font-semibold text-stone-800 flex items-center gap-2">
+              <User size={18} /> Account
+            </h3>
+          </div>
+          <div className="p-6">
+            <button
+              onClick={signOut}
+              className="w-full flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 text-stone-700 px-4 py-3 rounded-lg transition-colors"
+            >
+              <LogOut size={18} /> Sign Out
+            </button>
+            <p className="text-xs text-stone-400 mt-2 text-center">
+              You'll be redirected to the landing page
             </p>
           </div>
         </div>

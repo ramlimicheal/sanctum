@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Cross, 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  ArrowRight, 
+import {
+  Cross,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
   User,
   Check,
   Sparkles,
@@ -18,12 +18,14 @@ import {
 } from 'lucide-react';
 import { ViewState } from '@/types';
 import ParticleBackground from './ParticleBackground';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SignUpProps {
   onChangeView: (view: ViewState) => void;
 }
 
 const SignUp: React.FC<SignUpProps> = ({ onChangeView }) => {
+  const { signUp } = useAuth();
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -51,7 +53,7 @@ const SignUp: React.FC<SignUpProps> = ({ onChangeView }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (step === 1) {
       if (password !== confirmPassword) {
         setError('Passwords do not match');
@@ -68,22 +70,26 @@ const SignUp: React.FC<SignUpProps> = ({ onChangeView }) => {
       setStep(2);
       return;
     }
-    
+
     setIsLoading(true);
-    
-    // Simulate account creation
-    setTimeout(() => {
+
+    try {
+      const { error: signUpError } = await signUp(email, password, name);
+
+      if (signUpError) {
+        setError(signUpError.message || 'Failed to create account. Please try again.');
+        setIsLoading(false);
+      } else {
+        onChangeView(ViewState.DASHBOARD);
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
-      onChangeView(ViewState.DASHBOARD);
-    }, 1500);
+    }
   };
 
   const handleSocialSignup = (provider: string) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setStep(2);
-    }, 1500);
+    setError('Social signup will be available soon. Please use email/password for now.');
   };
 
   const toggleGoal = (goalId: string) => {

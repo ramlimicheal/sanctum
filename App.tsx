@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -24,10 +24,22 @@ import LandingPage from './components/LandingPage';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import { ViewState } from './types';
+import { useAuth } from './contexts/AuthContext';
 
 const App: React.FC = () => {
+  const { user, loading } = useAuth();
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.LANDING);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      if (user && currentView === ViewState.LANDING) {
+        setCurrentView(ViewState.DASHBOARD);
+      } else if (!user && ![ViewState.LANDING, ViewState.SIGNIN, ViewState.SIGNUP].includes(currentView)) {
+        setCurrentView(ViewState.LANDING);
+      }
+    }
+  }, [user, loading]);
 
   // Check if we're on an auth/landing page (no sidebar needed)
   const isAuthPage = [ViewState.LANDING, ViewState.SIGNIN, ViewState.SIGNUP].includes(currentView);
@@ -37,6 +49,19 @@ const App: React.FC = () => {
     setCurrentView(view);
     setSidebarOpen(false);
   };
+
+  if (loading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-stone-50">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <span className="text-2xl font-serif text-white">S</span>
+          </div>
+          <p className="text-stone-600 font-serif">Loading your sanctuary...</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderView = () => {
     switch (currentView) {
