@@ -23,10 +23,10 @@ export interface UserPreferences {
   theme: 'light' | 'dark';
 }
 
-const getUserId = () => {
-  const user = supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
-  return user;
+const getUserId = async (): Promise<string> => {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) throw new Error('User not authenticated');
+  return user.id;
 };
 
 export const getPrayerLetters = async (): Promise<PrayerLetter[]> => {
@@ -48,9 +48,11 @@ export const getPrayerLetters = async (): Promise<PrayerLetter[]> => {
 };
 
 export const addPrayerLetter = async (letter: Omit<PrayerLetter, 'id' | 'createdAt'>): Promise<void> => {
+  const userId = await getUserId();
   const { error } = await supabase
     .from('prayer_letters')
     .insert([{
+      user_id: userId,
       title: letter.title,
       content: letter.content,
       unlock_date: letter.unlockDate?.toISOString(),
@@ -104,9 +106,11 @@ export const getIntercessionItems = async (): Promise<IntercessionItem[]> => {
 };
 
 export const addIntercessionItem = async (item: Omit<IntercessionItem, 'id'>): Promise<void> => {
+  const userId = await getUserId();
   const { error } = await supabase
     .from('intercession_items')
     .insert([{
+      user_id: userId,
       name: item.name,
       request: item.request,
       category: item.category,
@@ -164,9 +168,11 @@ export const getVisionCards = async (): Promise<VisionCard[]> => {
 };
 
 export const addVisionCard = async (card: Omit<VisionCard, 'id'>): Promise<void> => {
+  const userId = await getUserId();
   const { error } = await supabase
     .from('vision_cards')
     .insert([{
+      user_id: userId,
       focus: card.focus,
       visual_keyword: card.visualKeyword,
       affirmation: card.affirmation,
@@ -212,9 +218,11 @@ export const getPivotStrategies = async (): Promise<PivotStrategy[]> => {
 };
 
 export const addPivotStrategy = async (strategy: Omit<PivotStrategy, 'id'>): Promise<void> => {
+  const userId = await getUserId();
   const { error } = await supabase
     .from('pivot_strategies')
     .insert([{
+      user_id: userId,
       habit: strategy.habit,
       trigger: strategy.trigger,
       interrupt_question: strategy.interruptQuestion,
@@ -229,9 +237,11 @@ export const addPivotStrategy = async (strategy: Omit<PivotStrategy, 'id'>): Pro
 };
 
 export const savePrayerSession = async (session: PrayerSession): Promise<void> => {
+  const userId = await getUserId();
   const { error } = await supabase
     .from('prayer_sessions')
     .insert([{
+      user_id: userId,
       date: session.date,
       duration_minutes: session.durationMinutes,
       focus: session.focus,
@@ -361,9 +371,11 @@ export const updatePrayerStreak = async (): Promise<PrayerStreak> => {
     }
   });
 
+  const userId = await getUserId();
   const { error } = await supabase
     .from('prayer_streaks')
     .upsert({
+      user_id: userId,
       current_streak: newStreak.currentStreak,
       longest_streak: newStreak.longestStreak,
       last_prayer_date: newStreak.lastPrayerDate,
@@ -399,9 +411,11 @@ export const getDevotionalProgress = async (): Promise<UserDevotionalProgress[]>
 };
 
 export const startDevotionalPlan = async (planId: string): Promise<void> => {
+  const userId = await getUserId();
   const { error } = await supabase
     .from('devotional_progress')
     .insert([{
+      user_id: userId,
       plan_id: planId,
       current_day: 1,
       start_date: new Date().toISOString().split('T')[0],
@@ -463,9 +477,11 @@ export const getCommunityPrayers = async (): Promise<CommunityPrayer[]> => {
 };
 
 export const addCommunityPrayer = async (prayer: Omit<CommunityPrayer, 'id' | 'createdAt' | 'prayerCount'>): Promise<void> => {
+  const userId = await getUserId();
   const { error } = await supabase
     .from('community_prayers')
     .insert([{
+      user_id: userId,
       request: prayer.request,
       category: prayer.category,
       is_anonymous: prayer.isAnonymous,
@@ -537,9 +553,11 @@ export const getTestimonies = async (): Promise<Testimony[]> => {
 };
 
 export const addTestimony = async (testimony: Omit<Testimony, 'id'>): Promise<void> => {
+  const userId = await getUserId();
   const { error } = await supabase
     .from('testimonies')
     .insert([{
+      user_id: userId,
       title: testimony.title,
       story: testimony.story,
       category: testimony.category,
@@ -588,9 +606,11 @@ export const getFastingSessions = async (): Promise<FastingSession[]> => {
 };
 
 export const addFastingSession = async (session: Omit<FastingSession, 'id'>): Promise<void> => {
+  const userId = await getUserId();
   const { error } = await supabase
     .from('fasting_sessions')
     .insert([{
+      user_id: userId,
       type: session.type,
       custom_description: session.customDescription,
       start_date: session.startDate.toISOString().split('T')[0],
@@ -699,9 +719,11 @@ export const getBibleBookmarks = async (): Promise<BibleBookmark[]> => {
 };
 
 export const addBibleBookmark = async (bookmark: Omit<BibleBookmark, 'id' | 'createdAt'>): Promise<void> => {
+  const userId = await getUserId();
   const { error } = await supabase
     .from('bible_bookmarks')
     .insert([{
+      user_id: userId,
       reference: bookmark.reference,
       note: bookmark.note,
     }]);
@@ -730,9 +752,11 @@ export const getBibleHighlights = async (): Promise<BibleHighlight[]> => {
 };
 
 export const addBibleHighlight = async (highlight: Omit<BibleHighlight, 'id' | 'createdAt'>): Promise<void> => {
+  const userId = await getUserId();
   const { error } = await supabase
     .from('bible_highlights')
     .insert([{
+      user_id: userId,
       reference: highlight.reference,
       text: highlight.text,
       color: highlight.color,

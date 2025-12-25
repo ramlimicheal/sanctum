@@ -56,11 +56,9 @@ const PrayerLetters: React.FC = () => {
         ? new Date(Date.now() + (unlockDays * 24 * 60 * 60 * 1000))
         : null;
 
-      const newLetter: PrayerLetter = {
-        id: Date.now().toString(),
+      const newLetter = {
         title: newTitle,
         content: newContent,
-        createdAt: new Date(),
         unlockDate: unlockDate,
         isAnswered: false,
         scriptureSeal: scriptureSeal || undefined,
@@ -68,7 +66,12 @@ const PrayerLetters: React.FC = () => {
       };
 
       await addPrayerLetter(newLetter);
-      setLetters([newLetter, ...letters]);
+      const fullLetter: PrayerLetter = {
+        id: Date.now().toString(),
+        createdAt: new Date(),
+        ...newLetter
+      };
+      setLetters([fullLetter, ...letters]);
       setView('list');
     } catch (error) {
       console.error('Error saving prayer letter:', error);

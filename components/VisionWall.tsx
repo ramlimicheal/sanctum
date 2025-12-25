@@ -37,7 +37,8 @@ const VisionWall: React.FC = () => {
     try {
       const card = await generateVisionBoard(newFocus);
       if (card) {
-        await addVisionCard(card);
+        const { id, ...cardData } = card;
+        await addVisionCard(cardData);
         setCards([card, ...cards]);
         setNewFocus('');
       }

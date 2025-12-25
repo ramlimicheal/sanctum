@@ -30,14 +30,17 @@ const Intercession: React.FC = () => {
   const handleAdd = async () => {
     if (!newItem.name || !newItem.request) return;
     try {
-      const item: IntercessionItem = {
-        id: Date.now().toString(),
+      const itemData = {
         name: newItem.name,
         request: newItem.request,
         lastPrayed: null,
         category: newItem.category
       };
-      await addIntercessionItem(item);
+      await addIntercessionItem(itemData);
+      const item: IntercessionItem = {
+        id: Date.now().toString(),
+        ...itemData
+      };
       setItems([item, ...items]);
       setNewItem({ name: '', request: '', category: 'General' });
       setIsAdding(false);
