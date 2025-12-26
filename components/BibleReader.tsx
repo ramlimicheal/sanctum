@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { BookOpen, Search, Bookmark, ChevronLeft, ChevronRight, Copy, Check, Heart } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BookOpen, Search, Bookmark, ChevronLeft, ChevronRight, Copy, Check, Heart, AlertCircle, Loader } from 'lucide-react';
 import { BibleBookmark } from '@/types';
 import { getBibleBookmarks, addBibleBookmark } from '@/services/storageService';
-
-// Sample Bible data (in production, this would come from an API)
+import { bibleService } from '@/services/bibleApiService';
 const BIBLE_BOOKS = [
   { name: 'Genesis', chapters: 50, testament: 'old' },
   { name: 'Exodus', chapters: 40, testament: 'old' },
@@ -37,63 +36,6 @@ const BIBLE_BOOKS = [
   { name: 'Revelation', chapters: 22, testament: 'new' },
 ];
 
-// Sample verses for popular chapters
-const SAMPLE_VERSES: Record<string, string[]> = {
-  'Psalms 23': [
-    'The LORD is my shepherd; I shall not want.',
-    'He maketh me to lie down in green pastures: he leadeth me beside the still waters.',
-    'He restoreth my soul: he leadeth me in the paths of righteousness for his name\'s sake.',
-    'Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.',
-    'Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over.',
-    'Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.',
-  ],
-  'John 3': [
-    'There was a man of the Pharisees, named Nicodemus, a ruler of the Jews:',
-    'The same came to Jesus by night, and said unto him, Rabbi, we know that thou art a teacher come from God: for no man can do these miracles that thou doest, except God be with him.',
-    'Jesus answered and said unto him, Verily, verily, I say unto thee, Except a man be born again, he cannot see the kingdom of God.',
-    'Nicodemus saith unto him, How can a man be born when he is old? can he enter the second time into his mother\'s womb, and be born?',
-    'Jesus answered, Verily, verily, I say unto thee, Except a man be born of water and of the Spirit, he cannot enter into the kingdom of God.',
-    'That which is born of the flesh is flesh; and that which is born of the Spirit is spirit.',
-    'Marvel not that I said unto thee, Ye must be born again.',
-    'The wind bloweth where it listeth, and thou hearest the sound thereof, but canst not tell whence it cometh, and whither it goeth: so is every one that is born of the Spirit.',
-    'Nicodemus answered and said unto him, How can these things be?',
-    'Jesus answered and said unto him, Art thou a master of Israel, and knowest not these things?',
-    'Verily, verily, I say unto thee, We speak that we do know, and testify that we have seen; and ye receive not our witness.',
-    'If I have told you earthly things, and ye believe not, how shall ye believe, if I tell you of heavenly things?',
-    'And no man hath ascended up to heaven, but he that came down from heaven, even the Son of man which is in heaven.',
-    'And as Moses lifted up the serpent in the wilderness, even so must the Son of man be lifted up:',
-    'That whosoever believeth in him should not perish, but have eternal life.',
-    'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.',
-    'For God sent not his Son into the world to condemn the world; but that the world through him might be saved.',
-  ],
-  'Romans 8': [
-    'There is therefore now no condemnation to them which are in Christ Jesus, who walk not after the flesh, but after the Spirit.',
-    'For the law of the Spirit of life in Christ Jesus hath made me free from the law of sin and death.',
-    'For what the law could not do, in that it was weak through the flesh, God sending his own Son in the likeness of sinful flesh, and for sin, condemned sin in the flesh:',
-    'That the righteousness of the law might be fulfilled in us, who walk not after the flesh, but after the Spirit.',
-    'For they that are after the flesh do mind the things of the flesh; but they that are after the Spirit the things of the Spirit.',
-    'For to be carnally minded is death; but to be spiritually minded is life and peace.',
-    'Because the carnal mind is enmity against God: for it is not subject to the law of God, neither indeed can be.',
-    'So then they that are in the flesh cannot please God.',
-    'But ye are not in the flesh, but in the Spirit, if so be that the Spirit of God dwell in you. Now if any man have not the Spirit of Christ, he is none of his.',
-    'And if Christ be in you, the body is dead because of sin; but the Spirit is life because of righteousness.',
-  ],
-  'Philippians 4': [
-    'Therefore, my brethren dearly beloved and longed for, my joy and crown, so stand fast in the Lord, my dearly beloved.',
-    'I beseech Euodias, and beseech Syntyche, that they be of the same mind in the Lord.',
-    'And I intreat thee also, true yokefellow, help those women which laboured with me in the gospel, with Clement also, and with other my fellowlabourers, whose names are in the book of life.',
-    'Rejoice in the Lord alway: and again I say, Rejoice.',
-    'Let your moderation be known unto all men. The Lord is at hand.',
-    'Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God.',
-    'And the peace of God, which passeth all understanding, shall keep your hearts and minds through Christ Jesus.',
-    'Finally, brethren, whatsoever things are true, whatsoever things are honest, whatsoever things are just, whatsoever things are pure, whatsoever things are lovely, whatsoever things are of good report; if there be any virtue, and if there be any praise, think on these things.',
-    'Those things, which ye have both learned, and received, and heard, and seen in me, do: and the God of peace shall be with you.',
-    'But I rejoiced in the Lord greatly, that now at the last your care of me hath flourished again; wherein ye were also careful, but ye lacked opportunity.',
-    'Not that I speak in respect of want: for I have learned, in whatsoever state I am, therewith to be content.',
-    'I know both how to be abased, and I know how to abound: every where and in all things I am instructed both to be full and to be hungry, both to abound and to suffer need.',
-    'I can do all things through Christ which strengtheneth me.',
-  ],
-};
 
 const BibleReader: React.FC = () => {
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
@@ -102,6 +44,9 @@ const BibleReader: React.FC = () => {
   const [bookmarks, setBookmarks] = useState<BibleBookmark[]>(getBibleBookmarks());
   const [copiedVerse, setCopiedVerse] = useState<number | null>(null);
   const [view, setView] = useState<'books' | 'chapters' | 'reading'>('books');
+  const [verses, setVerses] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSelectBook = (bookName: string) => {
     setSelectedBook(bookName);
@@ -111,6 +56,33 @@ const BibleReader: React.FC = () => {
   const handleSelectChapter = (chapter: number) => {
     setSelectedChapter(chapter);
     setView('reading');
+    setError(null);
+  };
+
+  useEffect(() => {
+    if (selectedChapter && selectedBook) {
+      loadChapter();
+    }
+  }, [selectedChapter, selectedBook]);
+
+  const loadChapter = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const reference = `${selectedBook} ${selectedChapter}`;
+      const verse = await bibleService.getVerse(reference);
+      if (verse) {
+        setVerses([verse.text]);
+      } else {
+        setError('Could not load scripture. Using fallback content.');
+        setVerses([`Scripture text for ${reference} could not be retrieved. Please try again or check your internet connection.`]);
+      }
+    } catch (err) {
+      setError('Failed to load scripture content');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBookmark = () => {
@@ -133,19 +105,7 @@ const BibleReader: React.FC = () => {
     setTimeout(() => setCopiedVerse(null), 2000);
   };
 
-  const getVerses = (): string[] => {
-    if (!selectedBook || !selectedChapter) return [];
-    const key = `${selectedBook} ${selectedChapter}`;
-    if (SAMPLE_VERSES[key]) return SAMPLE_VERSES[key];
-    
-    // Generate placeholder verses for chapters without sample data
-    return Array.from({ length: 20 }, (_, i) => 
-      `This is verse ${i + 1} of ${selectedBook} chapter ${selectedChapter}. In a full implementation, this would contain the actual Scripture text from a Bible API.`
-    );
-  };
-
   const currentBook = BIBLE_BOOKS.find(b => b.name === selectedBook);
-  const verses = getVerses();
 
   // Books View
   if (view === 'books') {
@@ -275,18 +235,17 @@ const BibleReader: React.FC = () => {
     );
   }
 
-  // Reading View
   if (view === 'reading' && selectedBook && selectedChapter) {
     return (
       <div className="p-6 md:p-10 max-w-3xl mx-auto space-y-6 animate-fade-in pb-24 relative z-10">
         <div className="flex items-center justify-between mb-4">
-          <button 
+          <button
             onClick={() => setView('chapters')}
             className="flex items-center gap-2 text-stone-500 hover:text-stone-800 transition-colors"
           >
             <ChevronLeft size={18} /> {selectedBook}
           </button>
-          
+
           <div className="flex items-center gap-2">
             <button
               onClick={handleBookmark}
@@ -296,6 +255,13 @@ const BibleReader: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {error && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+            <AlertCircle size={20} className="text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-amber-800 text-sm">{error}</p>
+          </div>
+        )}
 
         {/* Chapter Navigation */}
         <div className="flex items-center justify-between bg-white rounded-xl border border-stone-200 p-4">
@@ -320,30 +286,42 @@ const BibleReader: React.FC = () => {
           </button>
         </div>
 
-        {/* Verses */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 md:p-8">
-          <div className="space-y-4">
-            {verses.map((verse, index) => (
-              <div 
-                key={index}
-                className="group flex gap-3 hover:bg-emerald-50 -mx-2 px-2 py-1 rounded-lg transition-colors"
-              >
-                <span className="text-emerald-600 font-medium text-sm w-6 shrink-0 pt-1">
-                  {index + 1}
-                </span>
-                <p className="text-stone-700 leading-relaxed font-serif flex-1">
-                  {verse}
-                </p>
-                <button
-                  onClick={() => handleCopyVerse(index, verse)}
-                  className="opacity-0 group-hover:opacity-100 p-1 text-stone-400 hover:text-emerald-600 transition-all"
-                >
-                  {copiedVerse === index ? <Check size={16} /> : <Copy size={16} />}
-                </button>
-              </div>
-            ))}
+        {loading && (
+          <div className="bg-white rounded-xl border border-stone-200 p-8 flex items-center justify-center gap-3">
+            <Loader size={20} className="text-emerald-600 animate-spin" />
+            <p className="text-stone-600">Loading scripture...</p>
           </div>
-        </div>
+        )}
+
+        {!loading && (
+          <div className="bg-white rounded-xl border border-stone-200 p-6 md:p-8">
+            {verses.length > 0 ? (
+              <div className="space-y-4">
+                {verses.map((verse, index) => (
+                  <div
+                    key={index}
+                    className="group flex gap-3 hover:bg-emerald-50 -mx-2 px-2 py-1 rounded-lg transition-colors"
+                  >
+                    <span className="text-emerald-600 font-medium text-sm w-6 shrink-0 pt-1">
+                      {index + 1}
+                    </span>
+                    <p className="text-stone-700 leading-relaxed font-serif flex-1 whitespace-pre-wrap">
+                      {verse}
+                    </p>
+                    <button
+                      onClick={() => handleCopyVerse(index, verse)}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-stone-400 hover:text-emerald-600 transition-all shrink-0"
+                    >
+                      {copiedVerse === index ? <Check size={16} /> : <Copy size={16} />}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-stone-500 text-center py-8">No scripture content available.</p>
+            )}
+          </div>
+        )}
 
         {/* Quick Navigation */}
         <div className="flex justify-center gap-1 flex-wrap">

@@ -14,11 +14,13 @@ import {
   BookOpen,
   Heart,
   Users,
-  Flame
+  Flame,
+  AlertCircle
 } from 'lucide-react';
 import { ViewState } from '@/types';
 import ParticleBackground from './ParticleBackground';
 import { useAuth } from '@/contexts/AuthContext';
+import { validators } from '@/services/validationService';
 
 interface SignUpProps {
   onChangeView: (view: ViewState) => void;
@@ -36,6 +38,7 @@ const SignUp: React.FC<SignUpProps> = ({ onChangeView }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const spiritualGoals = [
     { id: 'prayer', label: 'Deepen my prayer life', icon: Heart, color: 'text-rose-600', bg: 'bg-rose-50' },
@@ -53,20 +56,45 @@ const SignUp: React.FC<SignUpProps> = ({ onChangeView }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setValidationErrors([]);
 
     if (step === 1) {
+      const errors: string[] = [];
+
+      if (!name.trim()) {
+        errors.push('Name is required');
+      } else if (name.length > 100) {
+        errors.push('Name must not exceed 100 characters');
+      }
+
+      if (!email.trim()) {
+        errors.push('Email is required');
+      } else if (!validators.email(email)) {
+        errors.push('Please enter a valid email address');
+      }
+
+      if (!password) {
+        errors.push('Password is required');
+      } else {
+        const passwordValidation = validators.password(password);
+        if (!passwordValidation.valid) {
+          errors.push(...passwordValidation.errors);
+        }
+      }
+
       if (password !== confirmPassword) {
-        setError('Passwords do not match');
-        return;
+        errors.push('Passwords do not match');
       }
-      if (!passwordRequirements.every(r => r.met)) {
-        setError('Please meet all password requirements');
-        return;
-      }
+
       if (!agreeTerms) {
-        setError('Please agree to the terms and conditions');
+        errors.push('Please agree to the terms and conditions');
+      }
+
+      if (errors.length > 0) {
+        setValidationErrors(errors);
         return;
       }
+
       setStep(2);
       return;
     }
@@ -223,6 +251,17 @@ const SignUp: React.FC<SignUpProps> = ({ onChangeView }) => {
                 {error && (
                   <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm">
                     {error}
+                  </div>
+                )}
+
+                {validationErrors.length > 0 && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
+                    {validationErrors.map((err, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-amber-800 text-sm">
+                        <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                        <span>{err}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
                 
