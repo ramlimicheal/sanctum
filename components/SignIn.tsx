@@ -8,11 +8,13 @@ import {
   ArrowRight,
   Sparkles,
   Chrome,
-  Apple
+  Apple,
+  AlertCircle
 } from 'lucide-react';
 import { ViewState } from '@/types';
 import ParticleBackground from './ParticleBackground';
 import { useAuth } from '@/contexts/AuthContext';
+import { validators } from '@/services/validationService';
 
 interface SignInProps {
   onChangeView: (view: ViewState) => void;
@@ -26,17 +28,40 @@ const SignIn: React.FC<SignInProps> = ({ onChangeView }) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setValidationErrors([]);
+
+    const errors: string[] = [];
+
+    if (!email.trim()) {
+      errors.push('Email is required');
+    } else if (!validators.email(email)) {
+      errors.push('Please enter a valid email address');
+    }
+
+    if (!password) {
+      errors.push('Password is required');
+    } else if (password.length < 6) {
+      errors.push('Password must be at least 6 characters');
+    }
+
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const { error: signInError } = await signIn(email, password);
+      const trimmedEmail = email.trim().toLowerCase();
+      const { error: signInError } = await signIn(trimmedEmail, password);
 
       if (signInError) {
-        setError(signInError.message || 'Failed to sign in. Please check your credentials.');
+        setError(signInError.message || 'Failed to sign in. Please check your credentials and try again.');
         setIsLoading(false);
       } else {
         onChangeView(ViewState.DASHBOARD);
@@ -111,6 +136,17 @@ const SignIn: React.FC<SignInProps> = ({ onChangeView }) => {
             {error && (
               <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm">
                 {error}
+              </div>
+            )}
+
+            {validationErrors.length > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
+                {validationErrors.map((err, idx) => (
+                  <div key={idx} className="flex items-start gap-2 text-amber-800 text-sm">
+                    <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                    <span>{err}</span>
+                  </div>
+                ))}
               </div>
             )}
             
